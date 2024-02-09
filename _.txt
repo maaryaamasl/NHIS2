@@ -1,0 +1,89 @@
+
+starting on page 30, there are guidelines for weights and variance estimation variables
+
+variable list I mentioned for these analyses (focusing in 2019 and 2021 data)
+
+
+
+I wonder if these analyses might be ready in time to submit as an abstract to the IASP conference (abstract deadline is January 31)?
+
+ 
+
+My responses to your comments are:
+
+ 
+
+Agree let’s limit to the 2019 dataset for both testing/training for now because of the important missing features in 2021.
+Agree cut variables with >30% missing and impute others
+Let’s change OPD12M_A to a risk factor and get rid of the other opioid variables
+Let’s pick PAIFRQ3M_A as our primary outcome (see below)
+Let’s pick high impact chronic pain (combination of PAIFRQ3M_A  and paiwklm3m_a) as secondary outcome (see below)
+In general for the covariates, risk factors, and SES factors, we’ll need to check the coding system and see if we need to recode as missing for responses of “refused”, “not ascertained”, or “don’t know” similar to the chronic pain variables below)
+
+Here is what I propose as our primary outcome – Chronic Pain
+
+ 
+
+PAIFRQ3M_A
+
+1 Never
+
+2 Some days
+
+3 Most days
+
+4 Every day
+
+7 Refused
+
+8 Not Ascertained
+
+9 Don't Know
+
+ 
+
+We should recode:
+
+Chronic Pain = 3 or 4
+
+No Chronic pain = 1 or 2
+
+And missing = 7, 8, or 9
+
+ 
+
+Secondary outcome – High Impact Chronic Pain (a combination of values for PAIFRQ3M_A  and paiwklm3m_a)
+
+ 
+
+paiwklm3m_a
+
+1 Never
+
+2 Some days
+
+3 Most days
+
+4 Every day
+
+7 Refused
+
+8 Not Ascertained
+
+9 Don't Know
+
+ 
+
+So High Impact Chronic Pain = yes for those who endorse:  PAIFRQ3M_A = 3 or 4  AND. paiwklm3m_a = 3 or 4
+
+ 
+
+Does that make sense? I know the secondary outcome will have far fewer included due to missing data.
+
+ 
+
+Thank you again!
+
+ 
+
+Matt

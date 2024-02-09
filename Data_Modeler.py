@@ -34,10 +34,10 @@ for column in outcomes:
     print(column, set(cleaned_data[column]), cleaned_data[column].value_counts().values)
 # Outcome <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< VARIABLES & OUTCOMES
 print("######### Setting ########")
-outcome = ['High_impact_chronic_pain'] # 'Chronic_Pain', 'High_impact_chronic_pain'
+outcome = ['Chronic_Pain'] # 'Chronic_Pain', 'High_impact_chronic_pain'
 filtering="HISPALLP_A__NH Black/African-American" # "HISPALLP_A__NH White" # SEX_A
 val = 1
-shap_reason = "shapRes-High_impact_chronic_pain-HISPALLP_A__NH Black-African-American-1"
+shap_reason = "shapRes-Chronic_Pain-HISPALLP_A__NH Black-African-American-1"
 print(shap_reason,outcome,filtering,val)
 print("######### Filter ###########")
 print('cleaned_data: ',cleaned_data.shape)

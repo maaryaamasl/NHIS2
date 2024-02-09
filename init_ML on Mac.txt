@@ -1,0 +1,22 @@
+Python 3.9 LTS
+
+virtualenv pytorch-env-x --python=3.9
+source pytorch-env-x/bin/activate
+
+pip install torch torchvision torchaudio
+pip install tensorflow-macos
+pip install tensorflow
+pip install tensorflow-metal
+
+pip install numpy ** - **upgrade
+pip install pandas ** - **upgrade
+pip install matplotlib ** - **upgrade
+pip install scikit-learn ** - **upgrade
+pip install scipy ** - **upgrade
+pip install plotly ** - **upgrade
+pip install jupyter lab
+
+conda install -n base nb_conda_kernels
+
+jupyter lab &
+https://cloudatlas.me/how-to-run-ptorch-and-tensorflow-with-m2-mac-f2f9aae06666
