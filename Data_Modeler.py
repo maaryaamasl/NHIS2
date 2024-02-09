@@ -33,7 +33,7 @@ outcomes = ['Chronic_Pain', 'High_impact_chronic_pain']
 for column in outcomes:
     print(column, set(cleaned_data[column]), cleaned_data[column].value_counts().values)
 # Outcome <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< VARIABLES & OUTCOMES
-print("######### Setting ########")
+print("######### Setting ########" )
 outcome = ['Chronic_Pain'] # 'Chronic_Pain', 'High_impact_chronic_pain'
 filtering="HISPALLP_A__NH Black/African-American" # "HISPALLP_A__NH White" # SEX_A
 val = 1
