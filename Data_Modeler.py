@@ -37,7 +37,7 @@ print("######### Setting ########")
 outcome = ['Chronic_Pain'] # 'Chronic_Pain', 'High_impact_chronic_pain'
 filtering="HISPALLP_A__NH Black/African-American" # "HISPALLP_A__NH White" # SEX_A
 val = 1
-shap_reason = "shapRes-Chronic_Pain-HISPALLP_A__NH Black-African-American-1"
+shap_reason = "hggit s"
 print(shap_reason,outcome,filtering,val)
 print("######### Filter ###########")
 print('cleaned_data: ',cleaned_data.shape)
