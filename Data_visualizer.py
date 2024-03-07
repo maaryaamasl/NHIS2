@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import re
 
-included = "" # "HISPALLP_A__NH Black-African-American-1" #"HISPALLP_A__NH White-1"  #"SEX_A-1" #"SEX_A-0"
+included = "SEX_A-0" # "HISPALLP_A__NH Black-African-American-1" #"HISPALLP_A__NH White-1"  #"SEX_A-1" #"SEX_A-0"
 outcome = ""
 # outcome = "High_impact_chronic_pain"
 for outcome in ["Chronic_Pain","High_impact_chronic_pain"]:
@@ -29,14 +29,14 @@ for outcome in ["Chronic_Pain","High_impact_chronic_pain"]:
     print("column_desc ",len(column_desc), column_desc)
     print("column_cat ",len(column_cat), column_cat)
     print("cats:", set(variable_list_df['category']))
-    feature_names = pd.read_csv('./'+sub_folder+'/columns.csv')['Column Names'].values
+    feature_names = pd.read_csv('C:\\Users\\hrmor\\ShapRes\\'+sub_folder+'\\columns.csv')['Column Names'].values
     print("feature_names ", len(feature_names), feature_names )
 
-    arr_shape = np.loadtxt('./'+sub_folder+'/shape.csv')
+    arr_shape = np.loadtxt('C:\\Users\\hrmor\\ShapRes\\'+sub_folder+'\\shape.csv')
     shap_values = [ [] for i in range(int(arr_shape))]
     print("load")
     for i in range(int(arr_shape)):
-        shap_values[i] = np.loadtxt('./'+sub_folder+'/shap_'+str(i)+".csv")
+        shap_values[i] = np.loadtxt('C:\\Users\\hrmor\\ShapRes\\'+sub_folder+'/shap_'+str(i)+".csv")
     print("loaded")
     print('\nD1 Classes:',len(shap_values),'\nD2 samples:', len(shap_values[0]))#,'\nD3 Columns/features:',len(shap_values[0][0]),'\nvalue:',shap_values[0][0][0])
     print('type: ',type(shap_values))
@@ -63,9 +63,9 @@ for outcome in ["Chronic_Pain","High_impact_chronic_pain"]:
     # df['label'] = df['label'].str.replace("  "," ").replace("\n"," ").replace("\t"," ")
 
     palette = sns.color_palette("bright", 10) # pastel
-    palette = {"Geographic": palette[1], "Socioeconomic Position": palette[3], "Primary Outcome": palette[0],
+    palette = {"Geographic": palette[1], "Socioeconomic Position": palette[3], #"Primary Outcome": palette[0],
                "Demographic": palette[9] , 'Physical Health': palette[4], 'Mental Health': palette[2]}  # 7 grey 5 dark red
-    hue_order = ['Geographic', 'Socioeconomic Position', 'Primary Outcome', 'Demographic', 'Physical Health', 'Mental Health']
+    hue_order = ['Geographic', 'Socioeconomic Position',  'Demographic', 'Physical Health', 'Mental Health'] # 'Primary Outcome',
 
     df_filtered = df.copy()
     df_filtered['index_df'] = df.index
