@@ -7,7 +7,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import re
 
-included = "" # "HISPALLP_A__NH Black-African-American-1" #"HISPALLP_A__NH White-1"  #"SEX_A-1" #"SEX_A-0"
+# TODO: * "" * "HISPALLP_A__NH Black-African-American-1" * "HISPALLP_A__NH White-1" * "SEX_A-1" - "SEX_A-0"
+included = "SEX_A-0"
+
 outcome = ""
 # outcome = "High_impact_chronic_pain"
 for outcome in ["Chronic_Pain","High_impact_chronic_pain"]:
@@ -95,8 +97,8 @@ for outcome in ["Chronic_Pain","High_impact_chronic_pain"]:
                            .apply(lambda x: x.replace("asian", "Asian"))
                            .apply(lambda x: x.replace("non-hispanic asian", "Non-Hispanic Asian"))
                            .apply(lambda x: x.replace("non-hispanic Asian", "Non-Hispanic Asian"))
-                           .apply(lambda x: x.replace("non-hispanic aian", "Non-Hispanic Aian"))
-                           .apply(lambda x: x.replace("aian", "Aian"))
+                           .apply(lambda x: x.replace("non-hispanic aian", "Non-Hispanic AIAN"))
+                           .apply(lambda x: x.replace("aian", "AIAN"))
                            .apply(lambda x: x.replace("hispanic", "Hispanic"))
                            .apply(lambda x: x.strip())
                            )
