@@ -15,7 +15,7 @@ def print_hi(name):
     ################################################################################
     df = pd.read_csv("./adult19.csv")
 
-    variable_list_df = pd.read_excel('NHIS variable list_Modified.xlsx')
+    variable_list_df = pd.read_excel('NHIS variable list_Modified_new.xlsx')
     selected_columns = variable_list_df['variable(s)'].tolist()
     print("selected_columns",selected_columns, '\nlen', len(selected_columns))
     selected_columns = [x.upper() for x in selected_columns]
@@ -152,18 +152,18 @@ def print_hi(name):
                         'EDUC_A': {97: np.nan, 99: np.nan},  # education from never 0 to 11 doctoral
                         'MAXEDUC_A': {'Unknown': np.nan},
                         'NOTCOV_A': {1: 1, 2: 0, 9: np.nan},  # 1: not cov, 2: covered (health)
-                        'MEDICARE_A': {1: 1, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},
+                        #'MEDICARE_A': {1: 1, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},
                         # 1:Yes, 2:yes no info, 3: no,
-                        'MEDICAID_A': {1: 1, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},
+                        #'MEDICAID_A': {1: 1, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},
                         # 1:Yes, 2:yes no info, 3: no,
-                        'PRIVATE_A': {1: 1, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},
+                        #'PRIVATE_A': {1: 1, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},
                         # 1:Yes, 2:yes no info, 3: no,
-                        'CHIP_A': {1: 1, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},  # 1:Yes, 2:yes no info, 3: no,
-                        'OTHPUB_A': {1: 1, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},  # 1:Yes, 2:yes no info, 3: no,
-                        'OTHGOV_A': {1: 1, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},  # 1:Yes, 2:yes no info, 3: no,
-                        'MILITARY_A': {1: 1, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},
+                        #'CHIP_A': {1: 1, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},  # 1:Yes, 2:yes no info, 3: no,
+                        #'OTHPUB_A': {1: 1, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},  # 1:Yes, 2:yes no info, 3: no,
+                        #'OTHGOV_A': {1: 1, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},  # 1:Yes, 2:yes no info, 3: no,
+                        #'MILITARY_A': {1: 1, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},
                         # 1:Yes, 2:yes no info, 3: no,
-                        'HICOV_A': {1: 1, 2: 0, 7: np.nan, 8: np.nan, 9: np.nan},  # 1:Yes, 2:No,
+                        #'HICOV_A': {1: 1, 2: 0, 7: np.nan, 8: np.nan, 9: np.nan},  # 1:Yes, 2:No,
                         'PAYBLL12M_A': {1: 1, 2: 0, 7: np.nan, 8: np.nan, 9: np.nan},  # 1:Yes, 2:No,
                         'PAYWORRY_A': {1: 2, 2: 1, 3: 0, 7: np.nan, 8: np.nan, 9: np.nan},
                         # 1:very worries, 2:somewhat, 3:not at all
@@ -193,6 +193,14 @@ def print_hi(name):
                         'PAITOOTH3M_A': {1: 0, 2: 1, 3: 3, 4: 2, 7: np.nan, 8: np.nan, 9: np.nan},
                         # 1: not at all, 2:a little, 3:a lot, 4:between a little and alot
                         'OPD12M_A': {1: 1, 2: 0, 7: np.nan, 8: np.nan, 9: np.nan, 'Unknown': np.nan},  # 1:Yes, 2:No,
+                        'ARTHEV_A': {1: 1, 2: 0, 7: np.nan, 8: np.nan, 9: np.nan, 'Unknown': np.nan},  # 1:Yes, 2:No,
+                        'CANEV_A': {1: 1, 2: 0, 7: np.nan, 8: np.nan, 9: np.nan, 'Unknown': np.nan},  # 1:Yes, 2:No,
+                        'DIBEV_A': {1: 1, 2: 0, 7: np.nan, 8: np.nan, 9: np.nan, 'Unknown': np.nan},  # 1:Yes, 2:No,
+                        'HYPEV_A': {1: 1, 2: 0, 7: np.nan, 8: np.nan, 9: np.nan, 'Unknown': np.nan},  # 1:Yes, 2:No,
+                        'STREV_A': {1: 1, 2: 0, 7: np.nan, 8: np.nan, 9: np.nan, 'Unknown': np.nan},  # 1:Yes, 2:No,
+                        'COPDEV_A': {1: 1, 2: 0, 7: np.nan, 8: np.nan, 9: np.nan, 'Unknown': np.nan},  # 1:Yes, 2:No,
+                        'CHDEV_A': {1: 1, 2: 0, 7: np.nan, 8: np.nan, 9: np.nan, 'Unknown': np.nan},  # 1:Yes, 2:No,
+                        'CHLEV_A': {1: 1, 2: 0, 7: np.nan, 8: np.nan, 9: np.nan, 'Unknown': np.nan},  # 1:Yes, 2:No,
                         }
     for col in selected_data.columns:
         selected_data[col] = pd.to_numeric(selected_data[col], errors='coerce', downcast='integer') # selected_data[col].astype(int) #
@@ -219,10 +227,11 @@ def print_hi(name):
         print("\n")
     # Imputation # replace with median
     for column in ['AGEP_A', 'PHSTAT_A', 'ANXEV_A', 'DEPEV_A', 'BMICAT_A', 'ANXFREQ_A', 'ANXMED_A',  'DEPFREQ_A', 'DEPMED_A', 'PHQCAT_A',
-                   'GADCAT_A', 'SMKCIGST_A', 'FAMINCTC_A', 'POVRATTC_A', 'INCGRP_A', 'RATCAT_A', 'EDUC_A', 'MAXEDUC_A', 'NOTCOV_A', 'MEDICARE_A', 'MEDICAID_A',
-                   'PRIVATE_A', 'CHIP_A', 'OTHPUB_A', 'OTHGOV_A', 'MILITARY_A', 'HICOV_A', 'PAYBLL12M_A', 'PAYWORRY_A', 'MEDDL12M_A','RXSK12M_A','RXLS12M_A',
+                   'GADCAT_A', 'SMKCIGST_A', 'FAMINCTC_A', 'POVRATTC_A', 'INCGRP_A', 'RATCAT_A', 'EDUC_A', 'MAXEDUC_A', 'NOTCOV_A',  'PAYBLL12M_A', 'PAYWORRY_A', 'MEDDL12M_A','RXSK12M_A','RXLS12M_A',
                    'RXDL12M_A', 'RXDG12M_A', 'MHTHDLY_A', 'MHTHND_A', 'EMPWRKLSWK_A', 'PCNTADTWKP_A' ,'FDSCAT4_A' ,'HOUYRSLIV_A', 'HOUTENURE_A',
                     'OPD12M_A']: # 'ANXLEVEL_A', 'PAIBACK3M_A','PAIULMB3M_A', 'PAILLMB3M_A', 'PAIHDFC3M_A', 'PAIAPG3M_A', 'PAITOOTH3M_A'
+        # modified_new : removed 'MEDICARE_A', 'MEDICAID_A',
+        #                    'PRIVATE_A', 'CHIP_A', 'OTHPUB_A', 'OTHGOV_A', 'MILITARY_A', 'HICOV_A',
         median_value = selected_data[column].median()
         selected_data[column].fillna(median_value, inplace=True)
 
@@ -233,7 +242,7 @@ def print_hi(name):
 
 
     # Make categorical
-    for column in ['REGION', 'ORIENT_A', 'MARITAL_A', 'RACEALLP_A', 'HISPALLP_A',]:
+    for column in ['REGION', 'ORIENT_A', 'MARITAL_A', 'RACEALLP_A']: # modified new: removed 'HISPALLP_A'
         df_dummy = pd.get_dummies(selected_data[column], prefix=(column+"_"))
         selected_data = pd.concat([selected_data, df_dummy], axis=1)
         selected_data.drop(column, axis=1, inplace=True)
