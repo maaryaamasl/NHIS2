@@ -34,15 +34,15 @@ for column in outcomes:
     print(column, set(cleaned_data[column]), cleaned_data[column].value_counts().values)
 # Outcome <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< VARIABLES & OUTCOMES
 print("######### Setting ########" )
-outcome = ['Chronic_Pain'] # 'Chronic_Pain', 'High_impact_chronic_pain'
-filtering="HISPALLP_A__NH Black/African-American" # "HISPALLP_A__NH White" # SEX_A
+outcome = ['High_impact_chronic_pain'] # 'Chronic_Pain', 'High_impact_chronic_pain'
+filtering="" # "HISPALLP_A__NH White" # SEX_A # "HISPALLP_A__NH Black/African-American"
 val = 1
 shap_reason = "hggit s"
 print(shap_reason,outcome,filtering,val)
 print("######### Filter ###########")
 print('cleaned_data: ',cleaned_data.shape)
-cleaned_data = cleaned_data[(cleaned_data[filtering] == val)] # & (selected_data['PAIWKLM3M_A'] == 1)
-cleaned_data.drop([filtering], axis=1, inplace=True)
+# cleaned_data = cleaned_data[(cleaned_data[filtering] == val)] # & (selected_data['PAIWKLM3M_A'] == 1)
+# cleaned_data.drop([filtering], axis=1, inplace=True)
 print('cleaned_data: ',cleaned_data.shape)
 
 drop_col = [x for x in outcomes if x not in outcome]
