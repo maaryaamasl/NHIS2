@@ -229,7 +229,7 @@ def print_hi(name):
     for column in ['AGEP_A', 'PHSTAT_A', 'ANXEV_A', 'DEPEV_A', 'BMICAT_A', 'ANXFREQ_A', 'ANXMED_A',  'DEPFREQ_A', 'DEPMED_A', 'PHQCAT_A',
                    'GADCAT_A', 'SMKCIGST_A', 'FAMINCTC_A', 'POVRATTC_A', 'INCGRP_A', 'RATCAT_A', 'EDUC_A', 'MAXEDUC_A', 'NOTCOV_A',  'PAYBLL12M_A', 'PAYWORRY_A', 'MEDDL12M_A','RXSK12M_A','RXLS12M_A',
                    'RXDL12M_A', 'RXDG12M_A', 'MHTHDLY_A', 'MHTHND_A', 'EMPWRKLSWK_A', 'PCNTADTWKP_A' ,'FDSCAT4_A' ,'HOUYRSLIV_A', 'HOUTENURE_A',
-                    'OPD12M_A']: # 'ANXLEVEL_A', 'PAIBACK3M_A','PAIULMB3M_A', 'PAILLMB3M_A', 'PAIHDFC3M_A', 'PAIAPG3M_A', 'PAITOOTH3M_A'
+                    'OPD12M_A','ARTHEV_A','CANEV_A','DIBEV_A','STREV_A','COPDEV_A','CHDEV_A','CHLEV_A']: # 'ANXLEVEL_A', 'PAIBACK3M_A','PAIULMB3M_A', 'PAILLMB3M_A', 'PAIHDFC3M_A', 'PAIAPG3M_A', 'PAITOOTH3M_A'
         # modified_new : removed 'MEDICARE_A', 'MEDICAID_A',
         #                    'PRIVATE_A', 'CHIP_A', 'OTHPUB_A', 'OTHGOV_A', 'MILITARY_A', 'HICOV_A',
         median_value = selected_data[column].median()
