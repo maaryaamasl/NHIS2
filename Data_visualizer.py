@@ -8,19 +8,20 @@ import seaborn as sns
 import re
 
 # TODO: * "" * "HISPALLP_A__NH Black-African-American-1" * "HISPALLP_A__NH White-1" * "SEX_A-1" - "SEX_A-0"
-included = "SEX_A-0"
+included = "NA" # SEX_A-0
 
 outcome = ""
+take_abs = True
 # outcome = "High_impact_chronic_pain"
-for outcome in ["Chronic_Pain","High_impact_chronic_pain"]:
+for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
     # sub_folder = 'shap1'
-    sub_folder ="shapRes-Chronic_Pain-"+included
+    sub_folder ="High_impact_chronic_pain-"+included
     if outcome == "High_impact_chronic_pain":
         # sub_folder = 'shap2'
-        sub_folder = "shapRes-High_impact_chronic_pain-" + included
+        sub_folder = "High_impact_chronic_pain-" + included
     print("outcome: ",outcome,sub_folder)
 
-    variable_list_df = pd.read_excel('NHIS variable list_Modified.xlsx')
+    variable_list_df = pd.read_excel('NHIS variable list_Modified_new.xlsx')
     # variable_list_df = variable_list_df[~variable_list_df['category'].isin(['nan', 'filter',np.nan])] # drop filter
     variable_list_df['category'] = variable_list_df['category'].apply(lambda x: x.title() if isinstance(x, str) else x)
     # variable_list_df['category'] = variable_list_df['category'].apply(str.title)
@@ -31,23 +32,32 @@ for outcome in ["Chronic_Pain","High_impact_chronic_pain"]:
     print("column_desc ",len(column_desc), column_desc)
     print("column_cat ",len(column_cat), column_cat)
     print("cats:", set(variable_list_df['category']))
-    feature_names = pd.read_csv('C:\\Users\\hrmor\\ShapRes\\'+sub_folder+'\\columns.csv')['Column Names'].values
+    feature_names = pd.read_csv('C:\\Users\\hrmor\\ShapRes\\'+sub_folder+'\\columns.csv')['Column Names'].values # C:\\Users\\hrmor\\ShapRes\\
     print("feature_names ", len(feature_names), feature_names )
 
-    arr_shape = np.loadtxt('C:\\Users\\hrmor\\ShapRes\\'+sub_folder+'\\shape.csv')
+    arr_shape = np.loadtxt('C:\\Users\\hrmor\\ShapRes\\'+sub_folder+'\\shape.csv') # C:\\Users\\hrmor\\ShapRes
     shap_values = [ [] for i in range(int(arr_shape))]
     print("load")
     for i in range(int(arr_shape)):
-        shap_values[i] = np.loadtxt('C:\\Users\\hrmor\\ShapRes\\'+sub_folder+'/shap_'+str(i)+".csv")
+        print(sub_folder+'\\shap_'+str(i)+".csv")
+        shap_values[i] = np.loadtxt('C:\\Users\\hrmor\\ShapRes\\'+sub_folder+'\\shap_'+str(i)+".csv") # C:\\Users\\hrmor\\ShapRes
     print("loaded")
     print('\nD1 Classes:',len(shap_values),'\nD2 samples:', len(shap_values[0]))#,'\nD3 Columns/features:',len(shap_values[0][0]),'\nvalue:',shap_values[0][0][0])
     print('type: ',type(shap_values))
     print('type [0]: ', type(shap_values[0]))
-    average_shap_values = np.mean(np.abs(shap_values), axis=0)
+    average_shap_values = np.mean((shap_values), axis=0)
+    if take_abs:
+        average_shap_values = np.mean(np.abs(shap_values), axis=0)
     print("average_shap_values shape", average_shap_values.shape)
 
     df = pd.DataFrame(average_shap_values, columns=['values'],index=feature_names)
-    print(df.head(),"\n",str(list(df.index)),"\n", len(list(df.index)),"\n")
+    print(df.head(),"\n",str(list(df.index)),"\n", len(list(df.index)),"\n",df.min(),"\n",df.max())
+    print("for index, row in df.iterrows():")
+    for index, row in df.iterrows():
+        print(f"Feature: {index}, Value: {row['values']}")
+
+
+
     df[['label','cat','color']] = np.nan
     df["inx"]=df.index
     df['label'] = df["inx"].str.split('__', expand=True).apply(lambda x: f"{column_desc.get(x[0], '')} [{(str(x[0]).capitalize())}] ({(str(x[1]).capitalize())})", axis=1)#[0].map(column_desc)
@@ -144,10 +154,10 @@ for outcome in ["Chronic_Pain","High_impact_chronic_pain"]:
         # ax.tick_params(axis='y', rotation=90)
 
         print("write ######################")
-        print("Fig\\" +outcome+"-"+included+ "-Abs-" + str(i) + '.svg',"\n\n\n")
+        print("Fig\\" +outcome+"-"+included+ "-Abs-" +str(take_abs) +"-"+ str(i) + '.svg',"\n\n\n")
         plt.subplots_adjust(left=0.01, right=0.9, top=0.9, bottom=0.1)  # right=0.9, top=0.9, bottom=0.1
         # plt.show()
-        plt.savefig( "Fig\\" +outcome+"-"+included+ "-Abs-" + str(i) + '.svg', bbox_inches="tight",
+        plt.savefig( "Fig\\" +outcome+"-"+included+ "-Abs-"+str(take_abs) +"-"+ str(i) + '.svg', bbox_inches="tight",
                     pad_inches=0.3, format='svg')  # facecolor='y', , transparent=True, dpi=200 , format='eps'
         # plt.savefig(dataLocation + "Figs/" + "Abs-" + str(i), bbox_inches="tight",
         #             pad_inches=0.3)
