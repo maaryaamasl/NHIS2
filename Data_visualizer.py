@@ -11,7 +11,7 @@ import re
 included = "NA" # SEX_A-0
 
 outcome = ""
-take_abs = True
+take_abs = False
 # outcome = "High_impact_chronic_pain"
 for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
     # sub_folder = 'shap1'
