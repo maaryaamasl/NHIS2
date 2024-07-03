@@ -58,9 +58,46 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
 
 
 
+    custom_labels = {
+    'REGION__Midwest': 'Midwest Region of U.S.',
+    'REGION__Northeast': 'Northeast Region of U.S.',
+    'REGION__South': 'Southern Region of U.S.',
+    'REGION__West': 'Western Region of U.S.',
+    'ORIENT_A__Bisexual': 'Bisexual Orientation',
+    'ORIENT_A__GayLesbian': 'Gay or Lesbian Orientation',
+    'ORIENT_A__Straight': 'Straight Orientation',
+    'ORIENT_A__Unknown': 'Unknown Sexual Orientation',
+    'MARITAL_A__9': 'MARITAL_A__9',
+    'MARITAL_A__Married': 'Married',
+    'MARITAL_A__Neither': 'Not Married or Living with a partner',
+    'MARITAL_A__Unknown': 'Unknown marital status',
+    'MARITAL_A__Unmarried couple': 'Living with a partner',
+    'RACEALLP_A__AIAN': 'AIAN only',
+    'RACEALLP_A__AIAN and any other group': 'AIAN and any other group',
+    'RACEALLP_A__Asian': 'Asian only',
+    'RACEALLP_A__Black/African-American': 'Black/African American only',
+    'RACEALLP_A__Other single and multiple races': 'Other single and multiple races',
+    'RACEALLP_A__Unknown': 'RACEALLP_A__Unknown',
+    'RACEALLP_A__White': 'White only'
+}
+    # Function to create labels
+    def create_label(inx):
+        if inx in custom_labels:
+            return custom_labels[inx]
+        else:
+            parts = inx.split('__')
+            if len(parts) == 2:
+                return f"{column_desc.get(parts[0], '')} [{(str(parts[0]))}] ({(str(parts[1]))})" # .capitalize()
+            else:
+                return f"{column_desc.get(parts[0], '')} [{(str(parts[0]))}]"
+            # return inx.str.split('__', expand=True).apply(lambda x: f"{column_desc.get(x[0], '')} [{(str(x[0]).capitalize())}] ({(str(x[1]).capitalize())})", axis=1)
+
+
     df[['label','cat','color']] = np.nan
     df["inx"]=df.index
-    df['label'] = df["inx"].str.split('__', expand=True).apply(lambda x: f"{column_desc.get(x[0], '')} [{(str(x[0]).capitalize())}] ({(str(x[1]).capitalize())})", axis=1)#[0].map(column_desc)
+    print("df['inx'].head():::\n",df["inx"].tail(20))
+    df['label'] = df["inx"].apply(create_label)#[0].map(column_desc)  ######## .str.split('__', expand=True).apply(lambda x: f"{column_desc.get(x[0], '')} [{(str(x[0]).capitalize())}] ({(str(x[1]).capitalize())})", axis=1)
+    print("df['label'].head():::\n",df['label'].tail(20))
     # df['label'] = df['label'].str.replace('(None)', '')
     df['cat'] = df["inx"].str.split('__', expand=True)[0].map(column_cat)
     df = df[~df['cat'].isin(['nan', 'Filter', np.nan])]  # drop filter
@@ -83,7 +120,7 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
     df_filtered['index_df'] = df.index
     df_filtered['values'] = df_filtered['values'].abs()
     df_filtered = df_filtered.sort_values(by='values', ascending=False).reset_index(drop=True)
-    df_filtered['label']= df_filtered['label'].apply(lambda x: x.capitalize() if isinstance(x, str) else x)
+    df_filtered['label']= df_filtered['label'].apply(lambda x: x if isinstance(x, str) else x) # .capitalize()
     df_filtered['label']= (df_filtered['label']
                            .apply(lambda x: x.replace(" (none)","")) #.replace(r"\(none\)", "", regex=True)
                            .replace(r"nh ", "non-hispanic ", regex=True) #.replace("nh ", "Non-Hispanic")
