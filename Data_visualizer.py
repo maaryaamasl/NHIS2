@@ -11,7 +11,7 @@ import re
 included = "NA" # SEX_A-0
 
 outcome = ""
-take_abs = False
+take_abs = True
 # outcome = "High_impact_chronic_pain"
 for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
     # sub_folder = 'shap1'
@@ -77,7 +77,7 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
     'RACEALLP_A__Asian': 'Asian only',
     'RACEALLP_A__Black/African-American': 'Black/African American only',
     'RACEALLP_A__Other single and multiple races': 'Other single and multiple races',
-    'RACEALLP_A__Unknown': 'RACEALLP_A__Unknown',
+    'RACEALLP_A__Unknown': 'Unknown race',
     'RACEALLP_A__White': 'White only'
 }
     # Function to create labels
