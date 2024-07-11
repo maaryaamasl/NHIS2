@@ -11,7 +11,7 @@ import re
 included = "NA" # SEX_A-0
 
 outcome = ""
-take_abs = True
+take_abs = False
 # outcome = "High_impact_chronic_pain"
 for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
     # sub_folder = 'shap1'
@@ -52,10 +52,12 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
 
     df = pd.DataFrame(average_shap_values, columns=['values'],index=feature_names)
     print(df.head(),"\n",str(list(df.index)),"\n", len(list(df.index)),"\n",df.min(),"\n",df.max())
-    sorted_df = df.sort_values(by='values', ascending=False).copy()
+    sorted_df = df.sort_values(by='values')
     print("for index, row in df.iterrows():")
+    count = 1
     for index, row in sorted_df.iterrows():
-        print(f"Feature: {index}, Value: {row['values']:.6f}")
+        print(f"{count} Feature: {index}, Value: {row['values']:.6f}")
+        count = count+1
 
 
 
@@ -119,7 +121,7 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
 
     df_filtered = df.copy()
     df_filtered['index_df'] = df.index
-    df_filtered['values'] = df_filtered['values']#.abs()
+    df_filtered['values'] = df_filtered['values']
     df_filtered = df_filtered.sort_values(by='values', ascending=False).reset_index(drop=True)
     df_filtered['label']= df_filtered['label'].apply(lambda x: x if isinstance(x, str) else x) # .capitalize()
     df_filtered['label']= (df_filtered['label']
@@ -156,16 +158,23 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
     #                                                   .replace("Hdl", "HDL")
     #                                                   )
 
-    my_dpi =200
-    for i in range(0, df_filtered.shape[0], 51):
+
+
+    print("# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    df_filtered_pos = df_filtered[df_filtered['values'] >= 0]
+    print("df_filtered_pos: ", df_filtered_pos.shape)
+    my_dpi = 200
+    for i in range(0, df_filtered_pos.shape[0], 51):
         import matplotlib as mpl
 
         mpl.rcParams['font.family'] = 'Arial'
         sns.set(font="Arial")
 
-        partial_df = df_filtered.iloc[i:i + 50].copy()
+        partial_df = df_filtered_pos.iloc[i:i + 50].copy()
         print("partial_df: ", partial_df.shape)
-        plt.figure(figsize=(900 / my_dpi, (2000 / my_dpi) * ((partial_df.shape[0] + 10) / (51 + 10))), dpi=my_dpi) ### size
+        plt.figure(figsize=(900 / my_dpi, (2000 / my_dpi) * ((partial_df.shape[0] + 10) / (51 + 10))),
+                   dpi=my_dpi)  ### size
         # sns.set(style="ticks")
         sns.set_style("darkgrid", {"axes.facecolor": ".9"})
         # sns.set_context("paper")
@@ -178,7 +187,7 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
         plt.xlabel('Mean |SHAP| (average impact on model output magnitude)', fontsize=12)
         plt.ylabel('Variables', fontsize=12, rotation=0)
         # plt.show()
-        plt.xlim(df_filtered['values'].min() - 0.0001, df_filtered['values'].max() * 1.02)
+        plt.xlim(partial_df['values'].min() - 0.0001, partial_df['values'].max() * 1.02)
         plt.grid()
 
         mpl.rcParams['font.family'] = 'Arial'
@@ -191,16 +200,67 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
         # ax.set_ylabel() # position=(x, y)
         # ax.tick_params(axis='y', rotation=90)
 
-        print("write ######################")
-        print("Fig\\" +outcome+"-"+included+ "-Abs-" +str(take_abs) +"-"+ str(i) + '.svg',"\n\n\n")
+        print("write ###################### pos")
+        print("Fig\\" + outcome + "-" + included + "-Abs-" + str(take_abs) + "-" + str(i) + '_pos.svg', "\n\n\n")
         plt.subplots_adjust(left=0.01, right=0.9, top=0.9, bottom=0.1)  # right=0.9, top=0.9, bottom=0.1
         # plt.show()
-        plt.savefig( "Fig\\" +outcome+"-"+included+ "-Abs-"+str(take_abs) +"-"+ str(i) + '.svg', bbox_inches="tight",
+        plt.savefig("Fig\\" + outcome + "-" + included + "-Abs-" + str(take_abs) + "-" + str(i) + '_pos.svg',
+                    bbox_inches="tight",
                     pad_inches=0.3, format='svg')  # facecolor='y', , transparent=True, dpi=200 , format='eps'
         # plt.savefig(dataLocation + "Figs/" + "Abs-" + str(i), bbox_inches="tight",
         #             pad_inches=0.3)
         plt.clf()
 
-    # exit()
+    print("# __________________________________________________________________")
+    # __________________________________________________________________
+    df_filtered_neg = df_filtered[df_filtered['values'] < 0]
+    print("df_filtered_neg: ", df_filtered_neg.shape)
+    my_dpi = 200
+    for i in range(0, df_filtered_neg.shape[0], 51):
+        import matplotlib as mpl
+
+        mpl.rcParams['font.family'] = 'Arial'
+        sns.set(font="Arial")
+
+        partial_df = df_filtered_neg.iloc[i:i + 50].copy()
+        print("partial_df: ", partial_df.shape)
+        plt.figure(figsize=(900 / my_dpi, (2000 / my_dpi) * ((partial_df.shape[0] + 10) / (51 + 10))),
+                   dpi=my_dpi)  ### size
+        # sns.set(style="ticks")
+        sns.set_style("darkgrid", {"axes.facecolor": ".9"})
+        # sns.set_context("paper")
+        ax = sns.barplot(y='label', x="values", data=partial_df, hue='color_label',
+                         dodge=False, hue_order=hue_order,
+                         palette=palette)  # ,palette=[palette[i] for i in partial_df.color.astype(int)])
+        # plt.xticks(fontsize=8,rotation=90)# ax.tick_params(axis='both', which='major', labelsize=10)
+        # plt.tight_layout()
+        plt.legend(title="Predictors", loc='lower right', prop={'size': 23})
+        plt.xlabel('Mean |SHAP| (average impact on model output magnitude)', fontsize=12)
+        plt.ylabel('Variables', fontsize=12, rotation=0)
+        # plt.show()
+        plt.xlim(partial_df['values'].min() - 0.0001, partial_df['values'].max() * 1.02)
+        plt.grid()
+
+        mpl.rcParams['font.family'] = 'Arial'
+        sns.set(font="Arial")
+        legend = plt.legend(loc='lower right', prop={'size': 13})
+        frame = legend.get_frame()
+        frame.set_facecolor('white')
+        # plt.axhline(y=14.5, color='r', linestyle='-')
+        ax.yaxis.set_label_coords(-1.1, 1.02)
+        # ax.set_ylabel() # position=(x, y)
+        # ax.tick_params(axis='y', rotation=90)
+
+        print("write ###################### Neg")
+        print("Fig\\" + outcome + "-" + included + "-Abs-" + str(take_abs) + "-" + str(i) + '_neg.svg', "\n\n\n")
+        plt.subplots_adjust(left=0.01, right=0.9, top=0.9, bottom=0.1)  # right=0.9, top=0.9, bottom=0.1
+        # plt.show()
+        plt.savefig("Fig\\" + outcome + "-" + included + "-Abs-" + str(take_abs) + "-" + str(i) + '_neg.svg',
+                    bbox_inches="tight",
+                    pad_inches=0.3, format='svg')  # facecolor='y', , transparent=True, dpi=200 , format='eps'
+        # plt.savefig(dataLocation + "Figs/" + "Abs-" + str(i), bbox_inches="tight",
+        #             pad_inches=0.3)
+        plt.clf()
+
 
 

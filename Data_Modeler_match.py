@@ -108,40 +108,20 @@ print("Accuracy (XGBoost Classifier):",outcome, accuracy, auc)
 # ['Chronic_Pain'] 0.835485933503836 0.66474041732368
 # exit(-1)
 
-print("h2o")  ############################### <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-h2o.init(max_mem_size="8G")
-aml = H2OAutoML(max_models=10, seed=1, sort_metric = "accuracy") # before 20 eresult below
-x=X.columns.tolist()
-y=Y.columns.tolist()[0]
-cleaned_data_h2o= h2o.H2OFrame(cleaned_data)
-cleaned_data_h2o[y] = cleaned_data_h2o[y].asfactor()
-print(len(x),x,"\n",y)
-train, test = cleaned_data_h2o.split_frame(ratios=[0.8], seed=1)
-aml.train(x=x, y=y, training_frame=train)
-leader_model = aml.leader
-predictions = leader_model.predict(test)
-accuracy = leader_model.model_performance(test).accuracy()
-print(f"Accuracy of the leader model: {accuracy}")
-leaderboard = aml.leaderboard
-print(leaderboard)
-leaderboard_all_metrics = aml.leaderboard.as_data_frame()
-print(leaderboard_all_metrics)
-for model_id in leaderboard['model_id']:
-    model = h2o.get_model(model_id)
-    accuracy = model.model_performance(test).accuracy()
-    print(f"Accuracy for {model_id}: {accuracy}")
-print(outcome)
-exit(1)
-
-
 def custom_predict(X):
     return clf.predict(X)
 kmeans_k =100 # 100
 rows_devideby_to_use = 1 # 1
 explainer = shap.KernelExplainer(custom_predict, shap.kmeans(X.values, kmeans_k))
 number_of_rows = X.values.shape[0]
+
+
+print("\nMatchFrame")
 random_indices = np.random.choice(number_of_rows, size=number_of_rows//rows_devideby_to_use, replace=False)
 random_rows = X.iloc[random_indices] #.values
+
+
+
 print("explainer.shap_values")
 shap_values = explainer.shap_values(random_rows)
 
