@@ -256,6 +256,7 @@ def print_hi(name):
     print(selected_data.describe())
 
     print("######### After categorization###########")
+    summary = {}
     def get_count_and_percentage(column):
         count = column.value_counts()
         percentage = column.value_counts(normalize=True) * 100
@@ -266,6 +267,14 @@ def print_hi(name):
         result = get_count_and_percentage(selected_data[col])
         print(f"=== {col} ===")
         print(result)
+        mean = selected_data[col].mean()
+        std = selected_data[col].std()
+        summary[col] = {
+            'Mean': mean,
+            'Std Dev': std
+        }
+        print(summary[col])
+
         print("\n")
     ################################################################################
 
