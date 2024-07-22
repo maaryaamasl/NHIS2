@@ -7,11 +7,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import re
 
-# TODO: * "" * "HISPALLP_A__NH Black-African-American-1" * "HISPALLP_A__NH White-1" * "SEX_A-1" - "SEX_A-0"
-included = "NA" # SEX_A-0
+# TODO: *** "NA" *** "SEX_A_1" *** "SEX_A_0" *** "RACEALLP_A__Black-African-American_1" *** "RACEALLP_A__White_-1"
+# # SEX_A "RACEALLP_A__White"  # "RACEALLP_A__Black/African-American"
+included = "SEX_A_1" # SEX_A_0
 
 outcome = ""
-take_abs = False
+take_abs = True
 # outcome = "High_impact_chronic_pain"
 for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
     # sub_folder = 'shap1'
