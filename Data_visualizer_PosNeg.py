@@ -9,7 +9,7 @@ import re
 
 # TODO: *** "NA" *** "SEX_A_1" *** "SEX_A_0" *** "RACEALLP_A__Black-African-American_1" *** "RACEALLP_A__White_-1"
 # # SEX_A "RACEALLP_A__White"  # "RACEALLP_A__Black/African-American"
-included = "SEX_A_1" # SEX_A_0
+included = "SEX_A_0" # SEX_A_0
 
 outcome = ""
 take_abs = True
