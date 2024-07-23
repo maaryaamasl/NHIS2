@@ -35,9 +35,9 @@ for column in outcomes:
 # Outcome <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< VARIABLES & OUTCOMES
 print("######### Setting ########" )
 outcome = ['High_impact_chronic_pain'] # 'Chronic_Pain', 'High_impact_chronic_pain'
-filtering = "RACEALLP_A__White" # # SEX_A "RACEALLP_A__White"  # "RACEALLP_A__Black/African-American"
+filtering = "RACEALLP_A__Black/African-American" # # SEX_A "RACEALLP_A__White"  # "RACEALLP_A__Black/African-American"
 val = 1
-shap_reason = "High_impact_chronic_pain-RACEALLP_A__White_1"
+shap_reason = "High_impact_chronic_pain-RACEALLP_A__Black-African-American_1"
 print(shap_reason,outcome,filtering,val)
 print("######### Filter ###########")
 print('cleaned_data: ',cleaned_data.shape)
