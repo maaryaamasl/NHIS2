@@ -93,6 +93,31 @@ x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_
 # Auto-ViML
 # MLBox
 
+print("h2o")  ############################### <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+h2o.init(max_mem_size="8G")
+aml = H2OAutoML(max_models=10, seed=1, sort_metric = "accuracy") # before 20 eresult below
+x=X.columns.tolist()
+y=Y.columns.tolist()[0]
+cleaned_data_h2o= h2o.H2OFrame(cleaned_data)
+cleaned_data_h2o[y] = cleaned_data_h2o[y].asfactor()
+print(len(x),x,"\n",y)
+train, test = cleaned_data_h2o.split_frame(ratios=[0.8], seed=1)
+aml.train(x=x, y=y, training_frame=train)
+leader_model = aml.leader
+predictions = leader_model.predict(test)
+accuracy = leader_model.model_performance(test).accuracy()
+print(f"Accuracy of the leader model: {accuracy}")
+leaderboard = aml.leaderboard
+print(leaderboard)
+leaderboard_all_metrics = aml.leaderboard.as_data_frame()
+print(leaderboard_all_metrics)
+for model_id in leaderboard['model_id']:
+    model = h2o.get_model(model_id)
+    accuracy = model.model_performance(test).accuracy()
+    print(f"Accuracy for {model_id}: {accuracy}")
+print(outcome)
+exit(1)
+
 
 
 print("XGboost") ############################### <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Chosen model
@@ -137,31 +162,6 @@ print(column_names)
 pd.DataFrame(column_names, columns=['Column Names']).to_csv("./"+shap_reason+'/columns.csv', index=False)
 
 exit()
-
-print("h2o")  ############################### <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-h2o.init(max_mem_size="8G")
-aml = H2OAutoML(max_models=10, seed=1, sort_metric = "accuracy") # before 20 eresult below
-x=X.columns.tolist()
-y=Y.columns.tolist()[0]
-cleaned_data_h2o= h2o.H2OFrame(cleaned_data)
-cleaned_data_h2o[y] = cleaned_data_h2o[y].asfactor()
-print(len(x),x,"\n",y)
-train, test = cleaned_data_h2o.split_frame(ratios=[0.8], seed=1)
-aml.train(x=x, y=y, training_frame=train)
-leader_model = aml.leader
-predictions = leader_model.predict(test)
-accuracy = leader_model.model_performance(test).accuracy()
-print(f"Accuracy of the leader model: {accuracy}")
-leaderboard = aml.leaderboard
-print(leaderboard)
-leaderboard_all_metrics = aml.leaderboard.as_data_frame()
-print(leaderboard_all_metrics)
-for model_id in leaderboard['model_id']:
-    model = h2o.get_model(model_id)
-    accuracy = model.model_performance(test).accuracy()
-    print(f"Accuracy for {model_id}: {accuracy}")
-print(outcome)
-exit(1)
 
 
 

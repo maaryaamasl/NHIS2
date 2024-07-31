@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import re
 
-# TODO: *** "NA" *** "SEX_A_1" *** "SEX_A_0" *** "RACEALLP_A__Black-African-American_1" *** "RACEALLP_A__White_-1"
+# TODO: *** "NA" *** "SEX_A_1" *** "SEX_A_0" *** "RACEALLP_A__Black-African-American_1" *** "RACEALLP_A__White_1"
 # # SEX_A "RACEALLP_A__White"  # "RACEALLP_A__Black/African-American"
-included = "SEX_A_0" # SEX_A_0
+included = "RACEALLP_A__White_1" # SEX_A_0
 
 outcome = ""
 take_abs = True
