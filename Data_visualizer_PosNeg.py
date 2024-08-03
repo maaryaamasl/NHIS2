@@ -4,15 +4,17 @@ pd.set_option('display.width', None)
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import seaborn as sns
 import re
 
+
+# NA # SEX_A "RACEALLP_A__White"  # "RACEALLP_A__Black/African-American"
 # TODO: *** "NA" *** "SEX_A_1" *** "SEX_A_0" *** "RACEALLP_A__Black-African-American_1" *** "RACEALLP_A__White_1"
-# # SEX_A "RACEALLP_A__White"  # "RACEALLP_A__Black/African-American"
-included = "RACEALLP_A__White_1" # SEX_A_0
+included = "RACEALLP_A__Black-African-American_1"
 
 outcome = ""
-take_abs = True
+take_abs = False
 # outcome = "High_impact_chronic_pain"
 for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
     # sub_folder = 'shap1'
@@ -189,6 +191,15 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
         plt.ylabel('Variables', fontsize=12, rotation=0)
         # plt.show()
         plt.xlim(partial_df['values'].min() - 0.0001, partial_df['values'].max() * 1.02)
+
+        x_min_pos = 0 # partial_df['values'].min() - 0.0001
+        x_max_pos = partial_df['values'].max() * 1.02
+
+        step_size = 0.003
+        ticks = np.arange(0, x_max_pos+step_size, step_size)
+        tick_labels = ['{:.3f}'.format(tick) for tick in ticks]
+        plt.xticks([tick for tick in ticks], ['{:.3f}'.format(tick) for tick in ticks])
+
         plt.grid()
 
         mpl.rcParams['font.family'] = 'Arial'
@@ -211,19 +222,23 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
         # plt.savefig(dataLocation + "Figs/" + "Abs-" + str(i), bbox_inches="tight",
         #             pad_inches=0.3)
         plt.clf()
+        break
 
     print("# __________________________________________________________________")
     # __________________________________________________________________
     df_filtered_neg = df_filtered[df_filtered['values'] < 0]
     print("df_filtered_neg: ", df_filtered_neg.shape)
     my_dpi = 200
-    for i in range(0, df_filtered_neg.shape[0], 51):
+    # for i in range(0, df_filtered_neg.shape[0], 51):
+    for i in range(df_filtered_neg.shape[0], 0, -51):
+        start_idx = max(0, i - 51)  # Ensure we don't go out of bounds
         import matplotlib as mpl
 
         mpl.rcParams['font.family'] = 'Arial'
         sns.set(font="Arial")
 
-        partial_df = df_filtered_neg.iloc[i:i + 50].copy()
+        # partial_df = df_filtered_neg.iloc[i:i + 50].copy()
+        partial_df = df_filtered_neg.iloc[start_idx:i].copy()
         print("partial_df: ", partial_df.shape)
         plt.figure(figsize=(900 / my_dpi, (2000 / my_dpi) * ((partial_df.shape[0] + 10) / (51 + 10))),
                    dpi=my_dpi)  ### size
@@ -239,12 +254,19 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
         plt.xlabel('Mean |SHAP| (average impact on model output magnitude)', fontsize=12)
         plt.ylabel('Variables', fontsize=12, rotation=0)
         # plt.show()
-        plt.xlim(partial_df['values'].min() - 0.0001, partial_df['values'].max() * 1.02)
+        # plt.xlim(partial_df['values'].min() - 0.0001, partial_df['values'].max() * 1.02)
+        # plt.xlim(x_min_pos, -x_max_pos)
+        # plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: '{:.3f}'.format(x)))
+        step_size = 0.003
+        ticks = np.arange(0, x_max_pos+step_size , step_size)
+        tick_labels = ['{:.3f}'.format(tick) for tick in ticks]
+        plt.xticks([-tick for tick in ticks], ['-{:.3f}'.format(tick) for tick in ticks])
+
         plt.grid()
 
         mpl.rcParams['font.family'] = 'Arial'
         sns.set(font="Arial")
-        legend = plt.legend(loc='lower right', prop={'size': 13})
+        legend = plt.legend(loc='upper left', prop={'size': 13})
         frame = legend.get_frame()
         frame.set_facecolor('white')
         # plt.axhline(y=14.5, color='r', linestyle='-')
@@ -262,6 +284,7 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
         # plt.savefig(dataLocation + "Figs/" + "Abs-" + str(i), bbox_inches="tight",
         #             pad_inches=0.3)
         plt.clf()
+        break
 
 
 
