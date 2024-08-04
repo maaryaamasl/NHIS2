@@ -11,7 +11,7 @@ import re
 
 # NA # SEX_A "RACEALLP_A__White"  # "RACEALLP_A__Black/African-American"
 # TODO: *** "NA" *** "SEX_A_1" *** "SEX_A_0" *** "RACEALLP_A__Black-African-American_1" *** "RACEALLP_A__White_1"
-included = "RACEALLP_A__Black-African-American_1"
+included = "RACEALLP_A__White_1"
 
 outcome = ""
 take_abs = False
@@ -188,6 +188,9 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
         # plt.tight_layout()
         plt.legend(title="Predictors", loc='lower right', prop={'size': 23})
         plt.xlabel('Mean |SHAP| (average impact on model output magnitude)', fontsize=12)
+        if not take_abs:
+            plt.xlabel('Mean SHAP (average impact on model output)', fontsize=12)
+
         plt.ylabel('Variables', fontsize=12, rotation=0)
         # plt.show()
         plt.xlim(partial_df['values'].min() - 0.0001, partial_df['values'].max() * 1.02)
@@ -252,6 +255,9 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
         # plt.tight_layout()
         plt.legend(title="Predictors", loc='lower right', prop={'size': 23})
         plt.xlabel('Mean |SHAP| (average impact on model output magnitude)', fontsize=12)
+        if not take_abs:
+            plt.xlabel('Mean SHAP (average impact on model output)', fontsize=12)
+
         plt.ylabel('Variables', fontsize=12, rotation=0)
         # plt.show()
         # plt.xlim(partial_df['values'].min() - 0.0001, partial_df['values'].max() * 1.02)
