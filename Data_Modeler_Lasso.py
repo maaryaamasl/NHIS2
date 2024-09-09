@@ -13,6 +13,7 @@ pd.set_option('display.width', None)
 import tpot
 from tpot import TPOTClassifier
 import h2o
+from h2o.estimators.glm import H2OGeneralizedLinearEstimator
 from h2o.automl import H2OAutoML
 # import autokeras as ak
 # from autokeras import StructuredDataClassifier
@@ -20,11 +21,18 @@ import shap
 # import shapley
 from xgboost import XGBClassifier
 # from lightgbm import LGBMClassifier
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, roc_auc_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
 
 
 
 print("\ncleaned_data")
-cleaned_data = pd.read_csv('Cleaned_data_2019_ageEdu.csv')
+cleaned_data = pd.read_csv('Cleaned_data_2019.csv')
 
 print('cleaned_data: ',cleaned_data.shape)
 # Chronic_Pain {0, 1}
@@ -35,14 +43,14 @@ for column in outcomes:
 # Outcome <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< VARIABLES & OUTCOMES
 print("######### Setting ########" )
 outcome = ['High_impact_chronic_pain'] # 'Chronic_Pain', 'High_impact_chronic_pain'
-filtering = "RACEALLP_A__Black/African-American" # # SEX_A "RACEALLP_A__White"  # "RACEALLP_A__Black/African-American"
+filtering="" # "HISPALLP_A__NH White" # SEX_A # "HISPALLP_A__NH Black/African-American"
 val = 1
-shap_reason = "High_impact_chronic_pain-RACEALLP_A__Black-African-American_1"
+shap_reason = "High_impact_chronic_pain-NA"
 print(shap_reason,outcome,filtering,val)
 print("######### Filter ###########")
 print('cleaned_data: ',cleaned_data.shape)
-cleaned_data = cleaned_data[(cleaned_data[filtering] == val)] # & (selected_data['PAIWKLM3M_A'] == 1)
-cleaned_data.drop([filtering], axis=1, inplace=True)
+# cleaned_data = cleaned_data[(cleaned_data[filtering] == val)] # & (selected_data['PAIWKLM3M_A'] == 1)
+# cleaned_data.drop([filtering], axis=1, inplace=True)
 print('cleaned_data: ',cleaned_data.shape)
 
 drop_col = [x for x in outcomes if x not in outcome]
@@ -79,8 +87,10 @@ for column in cleaned_data.columns:
 # Modeling
 print("\nModeling")
 X = cleaned_data.drop(outcome, axis=1)  # Features
+imputer = SimpleImputer(strategy='median')
+X = imputer.fit_transform(X)
 Y = cleaned_data[outcome]  # Target
-x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 
 ### Auto ML ###
 # tpot
@@ -93,9 +103,40 @@ x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_
 # Auto-ViML
 # MLBox
 
+model = LogisticRegression(penalty='l1', solver='saga', class_weight="balanced")
+
+# Train the model
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+y_pred_proba = model.predict_proba(X_test)[:, 1]  # Get predicted probabilities for AUC
+
+# Evaluate performance
+accuracy = accuracy_score(y_test, y_pred)
+auc = roc_auc_score(y_test, y_pred_proba)
+
+print(f"Accuracy of the model: {accuracy}")
+print(f"AUC of the model: {auc}")
+exit()
+
+
+print("XGboost") ############################### <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Chosen model
+clf = XGBClassifier()
+clf.fit(X, Y)
+y_pred_clf = clf.predict(X)
+accuracy = accuracy_score(Y, y_pred_clf)
+auc = roc_auc_score(Y, y_pred_clf)
+print("Accuracy (XGBoost Classifier):",outcome, accuracy, auc)
+# ['High_impact_chronic_pain'] 0.9716733806509368 0.8425071151403117
+# ['High_impact_chronic_pain'] 0.9234335038363172 0.6440411875664475
+# ['Chronic_Pain'] 0.8935673636421766 0.7915005806795882
+# ['Chronic_Pain'] 0.835485933503836 0.66474041732368
+# exit(-1)
+
 print("h2o")  ############################### <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 h2o.init(max_mem_size="8G")
-aml = H2OAutoML(max_models=20, seed=1, sort_metric = "accuracy") # before 20 eresult below
+aml = H2OAutoML(max_models=10, seed=1, sort_metric = "accuracy") # before 20 eresult below
 x=X.columns.tolist()
 y=Y.columns.tolist()[0]
 cleaned_data_h2o= h2o.H2OFrame(cleaned_data)
@@ -117,24 +158,6 @@ for model_id in leaderboard['model_id']:
     print(f"Accuracy for {model_id}: {accuracy}")
 print(outcome)
 exit(1)
-
-
-
-
-print("XGboost") ############################### <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Chosen model
-clf = XGBClassifier()
-clf.fit(X, Y)
-y_pred_clf = clf.predict(X)
-accuracy = accuracy_score(Y, y_pred_clf)
-auc = roc_auc_score(Y, y_pred_clf)
-print("Accuracy (XGBoost Classifier):",outcome, accuracy, auc)
-# ['High_impact_chronic_pain'] 0.9716733806509368 0.8425071151403117
-# ['High_impact_chronic_pain'] 0.9234335038363172 0.6440411875664475
-# ['Chronic_Pain'] 0.8935673636421766 0.7915005806795882
-# ['Chronic_Pain'] 0.835485933503836 0.66474041732368
-# exit(-1)
-
-
 
 
 def custom_predict(X):
@@ -163,7 +186,6 @@ print(column_names)
 pd.DataFrame(column_names, columns=['Column Names']).to_csv("./"+shap_reason+'/columns.csv', index=False)
 
 exit()
-
 
 
 # deeplearning prediction progress: |██████████████████████████████████████████████| (done) 100%
