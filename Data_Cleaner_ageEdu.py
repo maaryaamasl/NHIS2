@@ -6,6 +6,9 @@ pd.set_option('display.width', None)
 import sklearn as sk
 import re
 from time import sleep
+import warnings
+warnings.filterwarnings('ignore')
+
 
 Debug_each_Var = False
 make_categorical = False
@@ -67,10 +70,12 @@ def print_hi(name):
         missingCount = pd.DataFrame([selected_data.isna().sum().values], columns=selected_data.columns.values)
         print(missingCount[['PAIFRQ3M_A','PAIAMNT_A','PAIWKLM3M_A','PAIAFFM3M_A']])
         outcomes = selected_data[['PAIFRQ3M_A','PAIWKLM3M_A']].fillna('Unknown')
-        selected_data[['PAIWKLM3M_A']] = selected_data[['PAIWKLM3M_A']].fillna(0)
+        # fill or not!!!!!!!!!!!!!!!!!!!!!!!!
+        # selected_data[['PAIWKLM3M_A']] = selected_data[['PAIWKLM3M_A']].fillna(0)
         for column in ['PAIFRQ3M_A','PAIWKLM3M_A']:
             print(outcomes[column].value_counts()) # column,set(outcomes[column]),
         
+
         selected_data.dropna(subset=['PAIFRQ3M_A','PAIWKLM3M_A'], inplace=True) # 'PAIAMNT_A', ,'PAIAFFM3M_A'
         missingCount = pd.DataFrame([selected_data.isna().sum().values], columns=selected_data.columns.values)
         print(missingCount[['PAIFRQ3M_A','PAIWKLM3M_A']])
@@ -140,7 +145,11 @@ def print_hi(name):
         for column in selected_data.columns:
             if column == "HHX":
                 continue
-            print(column, set(interim_data[column]))
+            values = list(set(interim_data[column]))
+            if len(values) > 20:
+                print(column, values[:20] + ['...'])
+            else:
+                print(column, values)
         print(selected_data['HHX'].head(5))
         # continue
         # exit(-1)
@@ -237,6 +246,9 @@ def print_hi(name):
                             'CHDEV_A': {1: 1, 2: 0, 7: np.nan, 8: np.nan, 9: np.nan, 'Unknown': np.nan},  # 1:Yes, 2:No,
                             'CHLEV_A': {1: 1, 2: 0, 7: np.nan, 8: np.nan, 9: np.nan, 'Unknown': np.nan},  # 1:Yes, 2:No,
                             }
+                            # Still 2020 missing: HYPEV_A, ANXLEVEL_A
+                            # Still 2019 missing: HYPEV_A,
+                            
         for col in selected_data.columns:
             if col == "HHX":
                 continue
@@ -244,9 +256,13 @@ def print_hi(name):
         selected_data.replace(mapping_dict_var, inplace=True)
         print("\nValue after Dict. & Map Features")
         for column in selected_data.columns:
-            if col == "HHX":
+            if column == "HHX":
                 continue
-            print(column, set(selected_data[column]))
+            values = list(set(selected_data[column]))
+            if len(values) > 20:
+                print(column, values[:20] + ['...'])
+            else:
+                print(column, values)
             # selected_data[column] = pd.to_numeric(selected_data[column], errors='coerce') # selected_data[[column]].astype(int)
             # selected_data[column] = selected_data[column].replace(mapping_dict) # , inplace=True
             # print(column, set(selected_data[column]))
@@ -269,12 +285,12 @@ def print_hi(name):
         for column in ['AGEP_A', 'PHSTAT_A', 'ANXEV_A', 'DEPEV_A', 'BMICAT_A', 'ANXFREQ_A', 'ANXMED_A',  'DEPFREQ_A', 'DEPMED_A', 'PHQCAT_A',
                     'GADCAT_A', 'SMKCIGST_A', 'FAMINCTC_A', 'POVRATTC_A', 'INCGRP_A', 'RATCAT_A', 'EDUC_A', 'MAXEDUC_A', 'NOTCOV_A',  'PAYBLL12M_A', 'PAYWORRY_A', 'MEDDL12M_A','RXSK12M_A','RXLS12M_A',
                     'RXDL12M_A', 'RXDG12M_A', 'MHTHDLY_A', 'MHTHND_A', 'EMPWRKLSWK_A', 'PCNTADTWKP_A' ,'FDSCAT4_A' ,'HOUYRSLIV_A', 'HOUTENURE_A',
-                        'OPD12M_A','ARTHEV_A','CANEV_A','DIBEV_A','STREV_A','COPDEV_A','CHDEV_A','CHLEV_A']: # 'ANXLEVEL_A', 'PAIBACK3M_A','PAIULMB3M_A', 'PAILLMB3M_A', 'PAIHDFC3M_A', 'PAIAPG3M_A', 'PAITOOTH3M_A'
+                        'OPD12M_A','ARTHEV_A','CANEV_A','DIBEV_A','STREV_A','COPDEV_A','CHDEV_A','CHLEV_A', 'HYPEV_A','ANXLEVEL_A']: # 'ANXLEVEL_A', 'PAIBACK3M_A','PAIULMB3M_A', 'PAILLMB3M_A', 'PAIHDFC3M_A', 'PAIAPG3M_A', 'PAITOOTH3M_A'
             # modified_new : removed 'MEDICARE_A', 'MEDICAID_A',
             #                    'PRIVATE_A', 'CHIP_A', 'OTHPUB_A', 'OTHGOV_A', 'MILITARY_A', 'HICOV_A',
             if (file == './adult20.csv') and (column in ['PHQCAT_A' ,'GADCAT_A' ,'MEDDNG12M_A']):
                 continue
-            if (file == './adult19.csv') and (column in ['MEDDNG12M_A']):
+            if (file == './adult19.csv') and (column in ['MEDDNG12M_A', 'ANXLEVEL_A']):
                 continue
             median_value = selected_data[column].median()
             selected_data[column].fillna(median_value, inplace=True)
@@ -320,9 +336,16 @@ def print_hi(name):
         for column in selected_data.columns:
             if column == 'HHX':
                 continue
-            print(column, set(selected_data[column]))
+            values = list(set(selected_data[column]))
+            if len(values) > 20:
+                print(column, values[:20] + ['...'])
+            else:
+                print(column, values)
         print("HHX",selected_data['HHX'].head(5))
+        # Still 2020 missing: HYPEV_A, ANXLEVEL_A
+        # Still 2019 missing: HYPEV_A,
         # continue
+        # exit()
 
         print("\nWrite to file")
         year = re.search(r'\d+', file).group()
