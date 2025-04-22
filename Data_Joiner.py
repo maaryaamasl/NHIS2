@@ -2,14 +2,35 @@ import pandas as pd
 
 # Read the files
 df_2019 = pd.read_csv("Cleaned_data_2019_ageEdu.csv")
+print("df_2019.shape: ",df_2019.shape)
 df_2020 = pd.read_csv("Cleaned_data_2020_ageEdu.csv")
+print("df_2020.shape: ",df_2020.shape)
+
+
+##############
+print("Unique HHX in 2019:", df_2019['HHX'].nunique())
+print("Unique HHX in 2020:", df_2020['HHX'].nunique())
+
+# Check overlap between the two
+shared_HHX = set(df_2019['HHX']) & set(df_2020['HHX'])
+print("Shared HHX count:", len(shared_HHX))
+
+# Check for data types and formatting
+print("2019 HHX dtype:", df_2019['HHX'].dtype)
+print("2020 HHX dtype:", df_2020['HHX'].dtype)
+
+# Example of fixing formatting:
+df_2019['HHX'] = df_2019['HHX'].astype(str).str.strip()#.str.lstrip('0')
+df_2020['HHX'] = df_2020['HHX'].astype(str).str.strip()#.str.lstrip('0')
+
 
 # Perform inner join on 'HHX'
 merged_df = pd.merge(df_2019, df_2020, on='HHX', how='inner', suffixes=('_2019', '_2020'))
-
-# Optional: check the result
 print("Merged shape:", merged_df.shape)
 print(merged_df.head())
+
+
+# exit()
 
 for column in merged_df.columns:
             values = list(set(merged_df[column]))
@@ -50,7 +71,7 @@ def get_count_and_percentage(column):
                 result = pd.DataFrame({'Count': count, 'Percentage': percentage})
                 return result
 
-for col in ['Chronic_Pain_2019','High_impact_chronic_pain_2019','Chronic_Pain_2020','High_impact_chronic_pain_2020']:
+for col in ['High_impact_chronic_pain_2019','High_impact_chronic_pain_2020']: # 'Chronic_Pain_2019', 'Chronic_Pain_2020',
             result = get_count_and_percentage(merged_df[col])
             print(f"=== {col} ===")
             print(result)

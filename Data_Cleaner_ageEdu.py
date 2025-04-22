@@ -101,16 +101,39 @@ def print_hi(name):
             print(column, set(outcomes[column]), selected_data[column].value_counts().values)
         print("Number of rows after 2nd map&dropna:", len(selected_data))
         # exit(-1)
-        selected_data['Chronic_Pain'] = selected_data['PAIFRQ3M_A']
+        # selected_data['Chronic_Pain'] = selected_data['PAIFRQ3M_A']
         # High-impact chronic pain = Chronic pain that limited life or work activities on most days or every day during the previous 3 months.
         # (combination of PAIFRQ3M_A and paiwklm3m_a) as secondary outcome
         # PAIFRQ3M_A = 3 or 4  AND. paiwklm3m_a = 3 or 4
-        selected_data['High_impact_chronic_pain'] = (selected_data['PAIFRQ3M_A'] == 1) & (selected_data['PAIWKLM3M_A'] == 1)
+        # TODO: updated based on Mathew logic
+        # selected_data['High_impact_chronic_pain'] = (selected_data['PAIFRQ3M_A'] == 1) & (selected_data['PAIWKLM3M_A'] == 1)
+        # Define High-Impact Chronic Pain based on mapped values (0/1/nan)
+        def determine_high_impact(row):
+            freq = row['PAIFRQ3M_A']  # Pain frequency (after mapping)
+            limit = row['PAIWKLM3M_A']  # Pain limitation (after mapping)
+
+            if limit == 1:
+                return 1  # High-impact chronic pain (Yes)
+            elif limit == 0:
+                return 0  # Not high-impact
+            elif pd.isna(limit):
+                if freq == 0:
+                    return 0  # Missing limitation but low frequency → Not high-impact
+                elif freq == 1:
+                    return np.nan  # High frequency but missing limitation → Exclude this case
+            return np.nan
+
+        # Apply the logic
+        selected_data['High_impact_chronic_pain'] = selected_data.apply(determine_high_impact, axis=1)
+
+        # Drop rows where High-impact status is still unknown (np.nan)
+        selected_data.dropna(subset=['High_impact_chronic_pain'], inplace=True)
+
         selected_data.drop(['PAIFRQ3M_A', 'PAIWKLM3M_A'], axis=1, inplace=True) # not needed #############
         mapping_dict = {'High_impact_chronic_pain': {True: 1, False: 0}}
         print("outcome map & dropna 2")
         selected_data.replace(mapping_dict, inplace=True)
-        for column in ['Chronic_Pain', 'High_impact_chronic_pain']:
+        for column in [ 'High_impact_chronic_pain']: # 'Chronic_Pain',
             print(column, set(selected_data[column]), selected_data[column].value_counts().values)
         # exit(-1)
         # continue
