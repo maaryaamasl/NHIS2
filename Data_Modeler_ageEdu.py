@@ -24,14 +24,14 @@ from xgboost import XGBClassifier
 
 
 print("\ncleaned_data")
-cleaned_data = pd.read_csv('Cleaned_data_2019_ageEdu.csv')
+Merged_data = pd.read_csv('Merged_data_19n20_ageEdu.csv')
 
-print('cleaned_data: ',cleaned_data.shape)
+print('Merged_data: ', Merged_data.shape)
 # Chronic_Pain {0, 1}
 # High_impact_chronic_pain {0, 1}
 outcomes = ['Chronic_Pain', 'High_impact_chronic_pain']
 for column in outcomes:
-    print(column, set(cleaned_data[column]), cleaned_data[column].value_counts().values)
+    print(column, set(Merged_data[column]), Merged_data[column].value_counts().values)
 # Outcome <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< VARIABLES & OUTCOMES
 print("######### Setting ########" )
 outcome = ['High_impact_chronic_pain'] # 'Chronic_Pain', 'High_impact_chronic_pain'
@@ -40,17 +40,17 @@ val = 1
 shap_reason = "High_impact_chronic_pain-RACEALLP_A__Black-African-American_1"
 print(shap_reason,outcome,filtering,val)
 print("######### Filter ###########")
-print('cleaned_data: ',cleaned_data.shape)
-cleaned_data = cleaned_data[(cleaned_data[filtering] == val)] # & (selected_data['PAIWKLM3M_A'] == 1)
-cleaned_data.drop([filtering], axis=1, inplace=True)
-print('cleaned_data: ',cleaned_data.shape)
+print('cleaned_data: ', Merged_data.shape)
+Merged_data = Merged_data[(Merged_data[filtering] == val)] # & (selected_data['PAIWKLM3M_A'] == 1)
+Merged_data.drop([filtering], axis=1, inplace=True)
+print('cleaned_data: ', Merged_data.shape)
 
 drop_col = [x for x in outcomes if x not in outcome]
 print("Outcome:",outcome," \nDropped_col:",drop_col)
-cleaned_data.drop(drop_col, axis=1, inplace=True) # 'High_impact_chronic_pain'
-for column in cleaned_data.columns:
+Merged_data.drop(drop_col, axis=1, inplace=True) # 'High_impact_chronic_pain'
+for column in Merged_data.columns:
     if filtering in column:
-        print(column, set(cleaned_data[column]))
+        print(column, set(Merged_data[column]))
 
 
 
@@ -78,8 +78,8 @@ for column in cleaned_data.columns:
 
 # Modeling
 print("\nModeling")
-X = cleaned_data.drop(outcome, axis=1)  # Features
-Y = cleaned_data[outcome]  # Target
+X = Merged_data.drop(outcome, axis=1)  # Features
+Y = Merged_data[outcome]  # Target
 x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 
 ### Auto ML ###
@@ -98,7 +98,7 @@ h2o.init(max_mem_size="8G")
 aml = H2OAutoML(max_models=20, seed=1, sort_metric = "accuracy") # before 20 eresult below
 x=X.columns.tolist()
 y=Y.columns.tolist()[0]
-cleaned_data_h2o= h2o.H2OFrame(cleaned_data)
+cleaned_data_h2o= h2o.H2OFrame(Merged_data)
 cleaned_data_h2o[y] = cleaned_data_h2o[y].asfactor()
 print(len(x),x,"\n",y)
 train, test = cleaned_data_h2o.split_frame(ratios=[0.8], seed=1)
@@ -240,7 +240,7 @@ h2o.init()
 aml = H2OAutoML(max_models=3, seed=1) # before 20 eresult below
 x=X.columns.tolist()
 y=Y.columns.tolist()[0]
-cleaned_data_h2o= h2o.H2OFrame(cleaned_data)
+cleaned_data_h2o= h2o.H2OFrame(Merged_data)
 cleaned_data_h2o[y] = cleaned_data_h2o[y].asfactor()
 print(len(x),x,"\n",y)
 

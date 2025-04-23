@@ -76,7 +76,7 @@ def print_hi(name):
             print(outcomes[column].value_counts()) # column,set(outcomes[column]),
         
 
-        selected_data.dropna(subset=['PAIFRQ3M_A','PAIWKLM3M_A'], inplace=True) # 'PAIAMNT_A', ,'PAIAFFM3M_A'
+        # selected_data.dropna(subset=['PAIFRQ3M_A','PAIWKLM3M_A'], inplace=True) # 'PAIAMNT_A', ,'PAIAFFM3M_A'
         missingCount = pd.DataFrame([selected_data.isna().sum().values], columns=selected_data.columns.values)
         print(missingCount[['PAIFRQ3M_A','PAIWKLM3M_A']])
         print("Number of rows after first drop NaN outcome:", len(selected_data))
@@ -86,19 +86,19 @@ def print_hi(name):
         # Chronic Pain = 3 or 4 # No Chronic pain = 1 or 2 # And missing = 7, 8, or 9
         print("outcome convert to int")
         selected_data.drop(['PAIAMNT_A', 'PAIAFFM3M_A'], axis=1, inplace=True)  # not needed #############
-        for column in ['PAIFRQ3M_A', 'PAIWKLM3M_A']:
-            selected_data[column] = selected_data[column].astype(int)
+        # for column in ['PAIFRQ3M_A', 'PAIWKLM3M_A']:
+        #     selected_data[column] = selected_data[column].astype(int)
         mapping_dict = {
             'PAIFRQ3M_A': {1 : 0, 2 : 0, 3 : 1, 4 : 1, 7 : np.nan, 8 : np.nan, 9 : np.nan}, # zero, no, 1, yes
             'PAIWKLM3M_A': {1 : 0, 2 : 0, 3 : 1, 4 : 1, 7 : np.nan, 8 : np.nan, 9 : np.nan}
         }
         print("outcome map & dropna 2")
         selected_data.replace(mapping_dict, inplace=True)
-        selected_data.dropna(subset=['PAIFRQ3M_A', 'PAIWKLM3M_A'], inplace=True,how='any')
+        # selected_data.dropna(subset=['PAIFRQ3M_A', 'PAIWKLM3M_A'], inplace=True,how='any')
         print("Outcomes After map and dropna 2")
         outcomes = selected_data[['PAIFRQ3M_A', 'PAIWKLM3M_A']]
-        for column in ['PAIFRQ3M_A', 'PAIWKLM3M_A']:
-            print(column, set(outcomes[column]), selected_data[column].value_counts().values)
+        # for column in ['PAIFRQ3M_A', 'PAIWKLM3M_A']:
+        #     print(column, set(outcomes[column]), selected_data[column].value_counts().values)
         print("Number of rows after 2nd map&dropna:", len(selected_data))
         # exit(-1)
         # selected_data['Chronic_Pain'] = selected_data['PAIFRQ3M_A']
@@ -128,8 +128,8 @@ def print_hi(name):
 
         # Drop rows where High-impact status is still unknown (np.nan)
         selected_data.dropna(subset=['High_impact_chronic_pain'], inplace=True)
-
         selected_data.drop(['PAIFRQ3M_A', 'PAIWKLM3M_A'], axis=1, inplace=True) # not needed #############
+
         mapping_dict = {'High_impact_chronic_pain': {True: 1, False: 0}}
         print("outcome map & dropna 2")
         selected_data.replace(mapping_dict, inplace=True)
@@ -311,7 +311,7 @@ def print_hi(name):
                         'OPD12M_A','ARTHEV_A','CANEV_A','DIBEV_A','STREV_A','COPDEV_A','CHDEV_A','CHLEV_A', 'HYPEV_A','ANXLEVEL_A']: # 'ANXLEVEL_A', 'PAIBACK3M_A','PAIULMB3M_A', 'PAILLMB3M_A', 'PAIHDFC3M_A', 'PAIAPG3M_A', 'PAITOOTH3M_A'
             # modified_new : removed 'MEDICARE_A', 'MEDICAID_A',
             #                    'PRIVATE_A', 'CHIP_A', 'OTHPUB_A', 'OTHGOV_A', 'MILITARY_A', 'HICOV_A',
-            if (file == './adult20.csv') and (column in ['PHQCAT_A' ,'GADCAT_A' ,'MEDDNG12M_A']):
+            if (file == './adult20.csv') and (column in ['PHQCAT_A' ,'GADCAT_A' ,'MEDDNG12M_A','RXSK12M_A','RXLS12M_A','RXDL12M_A','OPD12M_A','ANXLEVEL_A']):
                 continue
             if (file == './adult19.csv') and (column in ['MEDDNG12M_A', 'ANXLEVEL_A']):
                 continue
