@@ -20,7 +20,9 @@ import shap
 # import shapley
 from xgboost import XGBClassifier
 # from lightgbm import LGBMClassifier
-
+import torch
+print(torch.version.cuda)
+print(torch.cuda.is_available())
 
 
 print("\ncleaned_data")
