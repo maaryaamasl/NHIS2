@@ -12,8 +12,8 @@ pd.set_option('display.width', None)
 # import pycaret as pc
 import tpot
 from tpot import TPOTClassifier
-import h2o
-from h2o.automl import H2OAutoML
+# import h2o
+# from h2o.automl import H2OAutoML
 # import autokeras as ak
 # from autokeras import StructuredDataClassifier
 import shap
