@@ -18,7 +18,7 @@ for outcome in ["High_impact_chronic_pain"]: # "Chronic_Pain",
     sub_folder ="High_impact_chronic_pain-"+included
     if outcome == "High_impact_chronic_pain":
         # sub_folder = 'shap2'
-        sub_folder = "High_impact_chronic_pain-" + included
+        sub_folder = "High_impact_chronic_pain_2019" + included
     print("outcome: ",outcome,sub_folder)
 
     variable_list_df = pd.read_excel('NHIS variable list_Modified_new.xlsx')

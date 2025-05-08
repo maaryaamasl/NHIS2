@@ -11,8 +11,8 @@ import re
 # TODO: * "" * "HISPALLP_A__NH Black-African-American-1" * "HISPALLP_A__NH White-1" * "SEX_A-1" - "SEX_A-0"
 
 take_abs = True
-shap_reason = "pain_trajectory"
-shap_dir = f"C:/venv-Shap/{shap_reason}/"
+shap_reason = "pain_trajectory_2019" # "pain_trajectory"
+shap_dir = f"C:/__venv-Shap/{shap_reason}/"
 
 
 # variable_list_df = pd.read_excel('./NHIS variable list_Modified_new.xlsx')
@@ -97,15 +97,15 @@ for class_idx, class_name in enumerate(class_names):
                     print(f"Change in: {column_desc.get(parts[0], '')} [{parts[1].replace('_', ' ')}]")
                     return f"Change in: {column_desc.get(parts[0], '')} [{parts[1].replace('_', ' ')}]"  # .capitalize()
                 else:
-                    print(f"Change in: {column_desc.get(parts[0], '')} [{(str(parts[0]))}]")
-                    return f"Change in: {column_desc.get(parts[0], '')} [{(str(parts[0]))}]"
+                    print(f"Change in: {column_desc.get(parts[0], '')}") # [{(str(parts[0]))}]")
+                    return f"Change in: {column_desc.get(parts[0], '')} " #[{(str(parts[0]))}]"
             else:
                 parts = inx.split('__')
                 # parts_change = inx.split('change_') # len(parts_change) = 2
                 if len(parts) == 2:
-                    return f"{column_desc.get(parts[0], '')} [{(str(parts[0]))}] ({(str(parts[1]))})" # .capitalize()
+                    return f"{column_desc.get(parts[0], '')} ({(str(parts[1]))})" # .capitalize() ####### [{(str(parts[0]))}]
                 else:
-                    return f"{column_desc.get(parts[0], '')} [{(str(parts[0]))}]"
+                    return f"{column_desc.get(parts[0], '')}" #[{(str(parts[0]))}]"
                 # return inx.str.split('__', expand=True).apply(lambda x: f"{column_desc.get(x[0], '')} [{(str(x[0]).capitalize())}] ({(str(x[1]).capitalize())})", axis=1)
 
 
@@ -136,6 +136,7 @@ for class_idx, class_name in enumerate(class_names):
     hue_order = ['Geographic', 'Socioeconomic Position',  'Demographic', 'Physical Health', 'Mental Health'] # 'Primary Outcome',
 
     df_filtered = df.copy()
+    df_filtered['label'] = df_filtered['label'].str.capitalize()
     df_filtered['index_df'] = df.index
     # df_filtered[class_name] = df_filtered[class_name]#.abs()
     df_filtered = df_filtered.sort_values(by=class_name, ascending=False).reset_index(drop=True)
@@ -143,7 +144,10 @@ for class_idx, class_name in enumerate(class_names):
     df_filtered['label']= (df_filtered['label']
                            .apply(lambda x: x.replace(" (none)","")) #.replace(r"\(none\)", "", regex=True)
                            .replace(r"nh ", "non-hispanic ", regex=True) #.replace("nh ", "Non-Hispanic")
-                           # .apply(lambda x: re.sub(r'\[.*?\]', '', x))
+                           # .apply(lambda x: re.sub(r'\[*?\]', '', x))
+                           # .apply(lambda x: re.sub(r'\(*?\)', '', x))
+                           .apply(lambda x: re.sub(r'\(Example[^)]*\)', '', x))
+                           .apply( lambda x: re.sub(r'\(example[^)]*\)', '', x))
                            .apply(lambda x: x.replace("  "," "))
                            .apply(lambda x: x.replace("(gad)", ""))  #
                            .apply(lambda x: x.replace("(phq)", ""))#
@@ -153,6 +157,7 @@ for class_idx, class_name in enumerate(class_names):
                            .apply(lambda x: x.replace("Get sik", "Get sick")) #
                            .apply(lambda x: x.replace("or living with a partner as an unmarried", "or living with a partner and unmarried"))
                            .apply(lambda x: x.replace("Us ", "US "))
+                           .apply(lambda x: x.replace("u.s.", "US "))
                            .apply(lambda x: x.replace("gaylesbian", "gay or lesbian"))
                            .apply(lambda x: x.replace("chip", "CHIP"))
                            .apply(lambda x: x.replace("Other government program", "Other government insurance program"))
@@ -168,6 +173,7 @@ for class_idx, class_name in enumerate(class_names):
                            .apply(lambda x: x.replace("hispanic", "Hispanic"))
                            .apply(lambda x: x.strip())
                            )
+
     print("df_filtered[['label']].head(100): ", df_filtered[['label']].tail(200))
     # df_filtered['label'] = df_filtered['label'].apply(lambda x: x.replace("Ldl","LDL").replace(" a1c "," A1C ")
     #                                                   .replace("+instructional+w","+w").replace("(not employed)","- not employed")
