@@ -6,7 +6,7 @@ import os
 
 variable_list_df = pd.read_excel('NHIS variable list REVISED 6-14-24_Now_Moddified new.xlsx')
 variable_list_df['category'] = variable_list_df['category'].apply(lambda x: x.title() if isinstance(x, str) else x)
-column_desc = dict(zip(variable_list_df['variable(s)'].str.upper(),variable_list_df['description']))
+column_desc = dict(zip(variable_list_df['variable(s)'].str.upper(),variable_list_df['Variable Labels for Figures'])) #!#!#! description  #!#!# Variable Labels for Figures
 
 import re
 

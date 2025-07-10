@@ -11,7 +11,7 @@ import re
 # TODO: * "" * "HISPALLP_A__NH Black-African-American-1" * "HISPALLP_A__NH White-1" * "SEX_A-1" - "SEX_A-0"
 
 take_abs = True
-shap_reason = "pain_trajectory_2019" # "pain_trajectory"
+shap_reason = "pain_trajectory" # "pain_trajectory_2019 # without changes # "pain_trajectory" # with changes
 shap_dir = f"C:/__venv-Shap/{shap_reason}/"
 
 
@@ -20,7 +20,7 @@ variable_list_df = pd.read_excel('NHIS variable list REVISED 6-14-24_Now_Moddifi
 variable_list_df['category'] = variable_list_df['category'].apply(lambda x: x.title() if isinstance(x, str) else x)
 selected_columns = variable_list_df['variable(s)'].tolist()
 
-column_desc = dict(zip(variable_list_df['variable(s)'].str.upper(),variable_list_df['description']))
+column_desc = dict(zip(variable_list_df['variable(s)'].str.upper(),variable_list_df['Variable Labels for Figures']))  #!#!#!   description    #!#!# Variable Labels for Figures
 column_cat = dict(zip(variable_list_df['variable(s)'].str.upper(), variable_list_df['category']))
 print("column_desc ",len(column_desc), column_desc)
 print("column_cat ",len(column_cat), column_cat)
@@ -136,7 +136,7 @@ for class_idx, class_name in enumerate(class_names):
     hue_order = ['Geographic', 'Socioeconomic Position',  'Demographic', 'Physical Health', 'Mental Health'] # 'Primary Outcome',
 
     df_filtered = df.copy()
-    df_filtered['label'] = df_filtered['label'].str.capitalize()
+    # df_filtered['label'] = df_filtered['label'].str.capitalize()
     df_filtered['index_df'] = df.index
     # df_filtered[class_name] = df_filtered[class_name]#.abs()
     df_filtered = df_filtered.sort_values(by=class_name, ascending=False).reset_index(drop=True)
