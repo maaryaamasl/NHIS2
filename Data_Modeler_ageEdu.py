@@ -24,7 +24,7 @@ from xgboost import XGBClassifier
 
 
 print("\ncleaned_data")
-Merged_data = pd.read_csv('Merged_data_19n20_ageEdu.csv')
+Merged_data = pd.read_csv('Cleaned_data_2019_ageEdu.csv')
 
 print('Merged_data: ', Merged_data.shape)
 # Chronic_Pain {0, 1}
@@ -52,7 +52,7 @@ for column in Merged_data.columns:
     if filtering in column:
         print(column, set(Merged_data[column]))
 
-
+exit()
 
 # print("######### After categorization ###########")
 

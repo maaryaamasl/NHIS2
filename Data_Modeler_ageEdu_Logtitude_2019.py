@@ -12,8 +12,8 @@ pd.set_option('display.width', None)
 # import pycaret as pc
 import tpot
 from tpot import TPOTClassifier
-# import h2o
-# from h2o.automl import H2OAutoML
+import h2o
+from h2o.automl import H2OAutoML
 # import autokeras as ak
 # from autokeras import StructuredDataClassifier
 import shap
@@ -23,7 +23,9 @@ from xgboost import XGBClassifier
 import torch
 print(torch.version.cuda)
 print(torch.cuda.is_available())
-
+from sklearn.metrics import accuracy_score, roc_auc_score
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import label_binarize
 
 print("\ncleaned_data")
 Merged_data = pd.read_csv('Data_longtitude_ageEdu.csv')
@@ -53,9 +55,9 @@ drop_col = [x for x in outcomes if x not in outcome]
 print("Outcome:",outcome," \nDropped_col:",drop_col)
 Merged_data.drop(drop_col, axis=1, inplace=True) # 'High_impact_chronic_pain'
 for column in Merged_data.columns:
-    if filtering in column:
-        print(column, set(Merged_data[column]))
-
+    # if filtering in column:
+    print(column, set(Merged_data[column]))
+exit()
 
 
 # print("######### After categorization ###########")
@@ -1489,7 +1491,64 @@ print("Accuracy (on full data):", outcome, accuracy, auc)
 # exit(-1)
 
 
-exit()
+# exit()
+
+
+print("h2o")  ############################### <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+h2o.init(max_mem_size="8G")
+aml = H2OAutoML(max_models=20, seed=1, sort_metric = "auc") # before 20 eresult below
+x=X.columns.tolist()
+y=Y.columns.tolist()[0]
+cleaned_data_h2o= h2o.H2OFrame(Merged_data.drop(columns=[col for col in Merged_data.columns if col.startswith('change_')])) #  or col in outcome
+cleaned_data_h2o[y] = cleaned_data_h2o[y].asfactor()
+print(len(x),x,"\n",y)
+train, test = cleaned_data_h2o.split_frame(ratios=[0.8], seed=1)
+aml.train(x=x, y=y, training_frame=train)
+leader_model = aml.leader
+predictions = leader_model.predict(test)
+
+leaderboard = aml.leaderboard
+print(leaderboard)
+
+# Convert leaderboard to Pandas DataFrame
+leaderboard_all_metrics = leaderboard.as_data_frame()
+print(leaderboard_all_metrics)
+
+# Loop through each model in leaderboard and compute accuracy
+model_ids = leaderboard_all_metrics['model_id'].tolist()
+for model_id in model_ids:
+    try:
+        model = h2o.get_model(model_id)
+
+        # Predict on test
+        pred_df = model.predict(test).as_data_frame()
+        y_pred = pred_df["predict"].values
+        y_score = pred_df.drop(columns=["predict"]).values
+
+        # Get true labels
+        y_true = test[y].as_data_frame().values.flatten()
+
+        # Accuracy
+        acc = accuracy_score(y_true, y_pred)
+
+        # AUC (macro, one-vs-rest)
+        y_true_bin = label_binarize(y_true, classes=np.unique(y_true))
+        auc = roc_auc_score(y_true_bin, y_score, average="macro", multi_class="ovr")
+
+        print(f"{model_id} --> Accuracy: {acc:.4f}, Macro-Averaged AUC: {auc:.4f}")
+        results.append({'Model': model_id, 'Accuracy': acc, 'AUC': auc})
+
+    except Exception as e:
+        print(f"Could not evaluate model {model_id}: {e}")
+
+# Display results sorted by accuracy
+results_df = pd.DataFrame(results).sort_values(by='Accuracy', ascending=False)
+print(results_df)
+
+
+print(outcome)
+exit(1)
+
 
 def custom_predict(X):
     return clf.predict_proba(X)

@@ -93,6 +93,7 @@ for col in df.columns:
     print(result)
 
 
+
 # 2019
 # URBRRL_2019 HISP_A_2019 SEX_A_2019 FSNAP12M_A_2019
 # 2020
@@ -103,3 +104,16 @@ for col in df.columns:
 df.to_csv("Data_longtitude_ageEdu.csv", index=False)
 
 
+import pandas as pd
+
+def get_count_and_percentage(column):
+    counts = column.value_counts()
+    pct = column.value_counts(normalize=True).mul(100)
+    return pd.DataFrame({'Count': counts, 'Percentage (%)': pct})
+
+for col in df.columns:
+    result = get_count_and_percentage(df[col])
+
+    # ── print a header and a Markdown table ─────────────────────────────
+    print(f"\n### {col}\n")                       # nicer header
+    print(result.to_markdown(tablefmt="github"))  # renders a clean table

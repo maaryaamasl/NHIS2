@@ -12,9 +12,9 @@ pd.set_option('display.width', None)
 # import pycaret as pc
 import tpot
 from tpot import TPOTClassifier
-# import h2o
-# from h2o.automl import H2OAutoML
-# import autokeras as ak
+import h2o
+from h2o.automl import H2OAutoML
+import autokeras as ak
 # from autokeras import StructuredDataClassifier
 import shap
 # import shapley
@@ -109,24 +109,58 @@ models = {
 # Store results
 results = []
 
+# from sklearn.preprocessing import LabelEncoder
+#
+# # Encode target labels to numbers
+# le = LabelEncoder()
+# y_train_encoded = le.fit_transform(y_train)
+# y_test_encoded = le.transform(y_test)
+# Y_encoded = le.fit_transform(Y)
+#
+# # Train, predict, and evaluate each model
+# for name, model in models.items():
+#     model.fit(x_train, y_train_encoded)
+#     y_pred = model.predict(x_test)
+#     acc = accuracy_score(y_test_encoded, y_pred)
+#     results.append({'Model': name, 'Accuracy': acc})
+#
+# # Create results DataFrame
+# results_df = pd.DataFrame(results).sort_values(by='Accuracy', ascending=False)
+# print(results_df)
+from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import label_binarize
 
-# Encode target labels to numbers
+# Encode target labels
 le = LabelEncoder()
 y_train_encoded = le.fit_transform(y_train)
 y_test_encoded = le.transform(y_test)
-Y_encoded = le.fit_transform(Y)
+
+# Binarize test labels for multiclass AUC
+y_test_binarized = label_binarize(y_test_encoded, classes=range(len(le.classes_)))
 
 # Train, predict, and evaluate each model
 for name, model in models.items():
     model.fit(x_train, y_train_encoded)
+
+    # Accuracy
     y_pred = model.predict(x_test)
     acc = accuracy_score(y_test_encoded, y_pred)
-    results.append({'Model': name, 'Accuracy': acc})
 
-# Create results DataFrame
+    # Probabilities for AUC
+    if hasattr(model, "predict_proba"):
+        y_prob = model.predict_proba(x_test)
+        auc = roc_auc_score(y_test_binarized, y_prob, multi_class='ovr')
+    else:
+        auc = None  # or np.nan
+
+    results.append({'Model': name, 'Accuracy': acc, 'AUC': auc})
+
+# Results DataFrame
 results_df = pd.DataFrame(results).sort_values(by='Accuracy', ascending=False)
 print(results_df)
+
+# exit()
 
 categorical_non_numeric = ['REGION', 'AGEP_A', 'ORIENT_A', 'MARITAL_A', 'RACEALLP_A', 'EDUC_A', 'MAXEDUC_A',
                            'change_MAXEDUC_A', 'change_EDUC_A', 'change_AGEP_A', 'change_MARITAL_A',
@@ -1440,35 +1474,151 @@ for model_id in leaderboard['model_id']:
 print(outcome)
 exit(1)"""
 
-# print("h2o")  ############################### <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-# h2o.init(max_mem_size="8G")
-# aml = H2OAutoML(max_models=20, seed=1, sort_metric = "accuracy") # before 20 eresult below
-# x=X.columns.tolist()
-# y=Y.columns.tolist()[0]
-# cleaned_data_h2o= h2o.H2OFrame(Merged_data)
-# cleaned_data_h2o[y] = cleaned_data_h2o[y].asfactor()
-# print(len(x),x,"\n",y)
-# train, test = cleaned_data_h2o.split_frame(ratios=[0.8], seed=1)
-# aml.train(x=x, y=y, training_frame=train)
-# leader_model = aml.leader
-# predictions = leader_model.predict(test)
-# accuracy = leader_model.model_performance(test).accuracy()
-# print(f"Accuracy of the leader model: {accuracy}")
-# leaderboard = aml.leaderboard
-# print(leaderboard)
-# leaderboard_all_metrics = aml.leaderboard.as_data_frame()
-# print(leaderboard_all_metrics)
-# for model_id in leaderboard['model_id']:
-#     model = h2o.get_model(model_id)
-#     accuracy = model.model_performance(test).accuracy()
-#     print(f"Accuracy for {model_id}: {accuracy}")
-# print(outcome)
-# exit(1)
+from h2o.estimators.glm import H2OGeneralizedLinearEstimator
+h2o.init()
+
+# Prepare data
+x = X.columns.tolist()
+y = Y.columns.tolist()[0]
+data_h2o = h2o.H2OFrame(Merged_data)
+data_h2o[y] = data_h2o[y].asfactor()
+
+# Train-test split
+train, test = data_h2o.split_frame(ratios=[0.8], seed=1)
+
+# Logistic regression model (auto detects binary or multinomial)
+# glm_model = H2OGeneralizedLinearEstimator(family="binomial" if data_h2o[y].nlevels()[0] == 2 else "multinomial")
+# glm_model.train(x=x, y=y, training_frame=train)
+#
+# # Evaluate performance
+# perf = glm_model.model_performance(test_data=test)
+#
+# # Accuracy
+# acc = 1 - perf.mean_per_class_error()
+# print(f"Accuracy: {acc:.4f}")
+#
+# # Multiclass AUC
+# try:
+#     auc_table = perf._metric_json.get("auc_table")
+#     if auc_table:
+#         print("Per-Class AUCs:")
+#         print(h2o.H2OTwoDimTable(auc_table).as_data_frame())
+# except Exception as e:
+#     print("AUC extraction error:", e)
+#
+# # Predict and extract for sklearn AUC
+# pred_df = glm_model.predict(test).as_data_frame()
+# true_labels = test[y].as_data_frame().values.flatten()
+# from sklearn.preprocessing import label_binarize
+# from sklearn.metrics import roc_auc_score
+#
+# y_true_bin = label_binarize(true_labels, classes=np.unique(true_labels))
+# y_score = pred_df.drop(columns=["predict"]).values
+# auc_macro = roc_auc_score(y_true_bin, y_score, average="macro", multi_class="ovr")
+# print(f"Macro-Averaged AUC (sklearn): {auc_macro:.4f}")
+# exit()
+
+print("h2o")  ############################### <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+h2o.init(max_mem_size="8G")
+aml = H2OAutoML(max_models=30, seed=1, sort_metric = "auc") # before 20 eresult below
+x=X.columns.tolist()
+y=Y.columns.tolist()[0]
+cleaned_data_h2o= h2o.H2OFrame(Merged_data)
+cleaned_data_h2o[y] = cleaned_data_h2o[y].asfactor()
+print(len(x),x,"\n",y)
+train, test = cleaned_data_h2o.split_frame(ratios=[0.8], seed=1)
+aml.train(x=x, y=y, training_frame=train)
+leader_model = aml.leader
+predictions = leader_model.predict(test)
+
+leaderboard = aml.leaderboard
+print(leaderboard)
+
+# Convert leaderboard to Pandas DataFrame
+leaderboard_all_metrics = leaderboard.as_data_frame()
+print(leaderboard_all_metrics)
+
+# Loop through each model in leaderboard and compute accuracy
+model_ids = leaderboard_all_metrics['model_id'].tolist()
+for model_id in model_ids:
+    try:
+        model = h2o.get_model(model_id)
+
+        # Predict on test
+        pred_df = model.predict(test).as_data_frame()
+        y_pred = pred_df["predict"].values
+        y_score = pred_df.drop(columns=["predict"]).values
+
+        # Get true labels
+        y_true = test[y].as_data_frame().values.flatten()
+
+        # Accuracy
+        acc = accuracy_score(y_true, y_pred)
+
+        # AUC (macro, one-vs-rest)
+        y_true_bin = label_binarize(y_true, classes=np.unique(y_true))
+        auc = roc_auc_score(y_true_bin, y_score, average="macro", multi_class="ovr")
+
+        print(f"{model_id} --> Accuracy: {acc:.4f}, Macro-Averaged AUC: {auc:.4f}")
+        results.append({'Model': model_id, 'Accuracy': acc, 'AUC': auc})
+
+    except Exception as e:
+        print(f"Could not evaluate model {model_id}: {e}")
+
+# Display results sorted by accuracy
+results_df = pd.DataFrame(results).sort_values(by='Accuracy', ascending=False)
+print(results_df)
+
+
+print(outcome)
+exit(1)
+"""
+GBM_grid_1_AutoML_1_20250711_145246_model_3 --> Accuracy: 0.8724, Macro-Averaged AUC: 0.8309
+                                                Model  Accuracy       AUC
+22        GBM_grid_1_AutoML_1_20250711_145246_model_6  0.876355  0.837334
+8         GBM_grid_1_AutoML_1_20250711_145246_model_4  0.875369  0.829643
+27                     GBM_1_AutoML_1_20250711_145246  0.874877  0.832384
+17                     GBM_4_AutoML_1_20250711_145246  0.873892  0.825908
+16        GBM_grid_1_AutoML_1_20250711_145246_model_7  0.873892  0.841328
+18            DeepLearning_1_AutoML_1_20250711_145246  0.872906  0.814683
+14        GBM_grid_1_AutoML_1_20250711_145246_model_5  0.872414  0.824704
+35        GBM_grid_1_AutoML_1_20250711_145246_model_3  0.872414  0.830851
+28        GBM_grid_1_AutoML_1_20250711_145246_model_2  0.871921  0.837193
+31                     GBM_2_AutoML_1_20250711_145246  0.871429  0.828651
+20  StackedEnsemble_BestOfFamily_1_AutoML_1_202507...  0.871429  0.821402
+33                     GBM_5_AutoML_1_20250711_145246  0.870936  0.833820
+5   StackedEnsemble_AllModels_1_AutoML_1_20250711_...  0.870936  0.823020
+23        GBM_grid_1_AutoML_1_20250711_145246_model_9  0.870443  0.836800
+21        GBM_grid_1_AutoML_1_20250711_145246_model_1  0.869951  0.810588
+11                     DRF_1_AutoML_1_20250711_145246  0.869458  0.807607
+30  DeepLearning_grid_3_AutoML_1_20250711_145246_m...  0.868966  0.747672
+19                     GBM_3_AutoML_1_20250711_145246  0.867980  0.826540
+1                                       Random Forest  0.867511  0.814265
+7                      XRT_1_AutoML_1_20250711_145246  0.867488  0.797464
+34  DeepLearning_grid_1_AutoML_1_20250711_145246_m...  0.867488  0.774635
+26  DeepLearning_grid_3_AutoML_1_20250711_145246_m...  0.866502  0.713053
+6         GBM_grid_1_AutoML_1_20250711_145246_model_8  0.865517  0.814209
+9   DeepLearning_grid_2_AutoML_1_20250711_145246_m...  0.864039  0.776382
+0                                 Logistic Regression  0.863614  0.795799
+15  DeepLearning_grid_2_AutoML_1_20250711_145246_m...  0.863547  0.714657
+25  DeepLearning_grid_1_AutoML_1_20250711_145246_m...  0.863054  0.729746
+2                                             XGBoost  0.862153  0.799623
+13  DeepLearning_grid_2_AutoML_1_20250711_145246_m...  0.860591  0.674756
+10  DeepLearning_grid_2_AutoML_1_20250711_145246_m...  0.860099  0.715981
+12  DeepLearning_grid_1_AutoML_1_20250711_145246_m...  0.859606  0.704947
+4   DeepLearning_grid_3_AutoML_1_20250711_145246_m...  0.858128  0.673867
+3                                                 SVM  0.856795       NaN
+29  DeepLearning_grid_3_AutoML_1_20250711_145246_m...  0.856650  0.762315
+24  DeepLearning_grid_1_AutoML_1_20250711_145246_m...  0.855172  0.753200
+32  DeepLearning_grid_1_AutoML_1_20250711_145246_m...  0.789655  0.736858
+['pain_trajectory']
+Closing connection _sid_b453 at exit
+H2O session _sid_b453 closed.
+"""
 
 
 
-
-
+exit()
 print("XGboost") ############################### <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Chosen model
 # x_train, y_train_encoded, x_test, y_test_encoded, y_pred
 
