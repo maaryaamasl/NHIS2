@@ -1,5 +1,7 @@
 
 import pandas as pd
+from sympy import false
+
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
 import numpy as np
@@ -10,8 +12,9 @@ import re
 
 # TODO: * "" * "HISPALLP_A__NH Black-African-American-1" * "HISPALLP_A__NH White-1" * "SEX_A-1" - "SEX_A-0"
 
-take_abs = True
-shap_reason = "pain_trajectory" # "pain_trajectory_2019 # without changes # "pain_trajectory" # with changes
+take_abs = False
+neg = True
+shap_reason = "pain_trajectory_2019" # "pain_trajectory_2019 # without changes # "pain_trajectory" # with changes
 shap_dir = f"C:/__venv-Shap/{shap_reason}/"
 
 
@@ -45,10 +48,15 @@ if take_abs:
     average_shap_values = np.mean(np.abs(shap_values_array), axis=0)
 else:
     average_shap_values = np.mean(shap_values_array, axis=0)
+    average_shap_values_abs_helper = np.mean(np.abs(shap_values_array), axis=0)
 print("average_shap_values shape", average_shap_values.shape)
 
 
 df = pd.DataFrame(average_shap_values, columns=class_names,index=feature_names)
+if not take_abs:
+    helper = pd.DataFrame(average_shap_values_abs_helper, columns=class_names, index=feature_names)
+    helper.columns = ['helper_' + col for col in helper.columns]
+    df = df.join(helper)
 print(df.head(5),"\n",str(list(df.index)),"\n", len(list(df.index)))
 
 
@@ -56,6 +64,9 @@ print(df.head(5),"\n",str(list(df.index)),"\n", len(list(df.index)))
 for class_idx, class_name in enumerate(class_names):
     print(f"\nPlotting for class: {class_name}")
     sorted_df = df.sort_values(by=class_name, ascending=False).copy()
+    if not take_abs:
+        sorted_df = df.sort_values(by=('helper_'+class_name), ascending=False).copy()
+        print(sorted_df[[class_name, 'helper_' + class_name]].head(3))
 
     custom_labels = {
     'REGION__Midwest': 'Midwest Region of U.S.',
@@ -140,14 +151,28 @@ for class_idx, class_name in enumerate(class_names):
     df_filtered['index_df'] = df.index
     # df_filtered[class_name] = df_filtered[class_name]#.abs()
     df_filtered = df_filtered.sort_values(by=class_name, ascending=False).reset_index(drop=True)
+    if not take_abs:
+        df_filtered = df_filtered.sort_values(by='helper_' + class_name, ascending=False).reset_index(drop=True)
+        if neg:
+            df_filtered = df[df[class_name] < 0]
+            df_filtered = df_filtered.sort_values(by='helper_' + class_name, ascending=False).reset_index(drop=True)
+            # df_filtered = df_filtered.head(10)
+        if not neg:
+            df_filtered = df[df[class_name] > 0]
+            df_filtered = df_filtered.sort_values(by='helper_' + class_name, ascending=False).reset_index(drop=True)
+            # df_filtered = df_filtered.head(10)
     df_filtered['label']= df_filtered['label'].apply(lambda x: x if isinstance(x, str) else x) # .capitalize()
     df_filtered['label']= (df_filtered['label']
                            .apply(lambda x: x.replace(" (none)","")) #.replace(r"\(none\)", "", regex=True)
-                           .replace(r"nh ", "non-hispanic ", regex=True) #.replace("nh ", "Non-Hispanic")
+                           .apply(lambda x: x.replace("Age (Age ", "Age ("))
+                           .str.replace(r"nh ", "non-hispanic ", regex=True) #.replace("nh ", "Non-Hispanic")
+                           .str.replace(r'Age \((\d{1,3})-(\d{1,3})\)', lambda m: f"Age ({m.group(1)}-{m.group(2)} years)",
+                                    regex=True)
                            # .apply(lambda x: re.sub(r'\[*?\]', '', x))
                            # .apply(lambda x: re.sub(r'\(*?\)', '', x))
                            .apply(lambda x: re.sub(r'\(Example[^)]*\)', '', x))
                            .apply( lambda x: re.sub(r'\(example[^)]*\)', '', x))
+                           .apply(lambda x: re.sub(r'\(REF group=[^)]*\)', '', x))
                            .apply(lambda x: x.replace("  "," "))
                            .apply(lambda x: x.replace("(gad)", ""))  #
                            .apply(lambda x: x.replace("(phq)", ""))#
@@ -181,13 +206,17 @@ for class_idx, class_name in enumerate(class_names):
     #                                                   )
 
     my_dpi =200
-    for i in range(0, df_filtered.shape[0], 51):
+    top = 50
+    if not take_abs:
+        top= 10
+        my_dpi = 300
+    for i in range(1): #range(0, df_filtered.shape[0], 51):
         import matplotlib as mpl
 
         mpl.rcParams['font.family'] = 'Arial'
         sns.set(font="Arial")
 
-        partial_df = df_filtered.iloc[i:i + 50].copy()
+        partial_df = df_filtered.iloc[i:i + top].copy()
         print("partial_df: ", partial_df.shape)
         plt.figure(figsize=(900 / my_dpi, (2000 / my_dpi) * ((partial_df.shape[0] + 10) / (51 + 10))), dpi=my_dpi) ### size
         # sns.set(style="ticks")
@@ -199,31 +228,48 @@ for class_idx, class_name in enumerate(class_names):
         # plt.xticks(fontsize=8,rotation=90)# ax.tick_params(axis='both', which='major', labelsize=10)
         # plt.tight_layout()
         plt.legend(title="Predictors", loc='lower right', prop={'size': 23})
+        if not take_abs:
+            plt.legend(title="Predictors", loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 13})
+            plt.tight_layout(rect=[0, 0, 0.85, 1])
         plt.xlabel('Mean |SHAP| (average impact on model output magnitude)', fontsize=12)
+        if not take_abs:
+            plt.xlabel('Mean SHAP (average directional impact on model output)', fontsize=12)
         plt.ylabel('Variables', fontsize=12, rotation=0)
         # plt.show()
         plt.xlim(df_filtered[class_name].min() - 0.0001, df_filtered[class_name].max() * 1.02)
+        if not take_abs and neg:
+            plt.xlim(df_filtered[class_name].min() - 0.0001, 0.0)
         plt.grid()
 
         mpl.rcParams['font.family'] = 'Arial'
         sns.set(font="Arial")
         legend = plt.legend(loc='lower right', prop={'size': 13})
+        if not take_abs:
+            legend = plt.legend(title="Predictors", loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 13})
         frame = legend.get_frame()
         frame.set_facecolor('white')
         # plt.axhline(y=14.5, color='r', linestyle='-')
-        ax.yaxis.set_label_coords(-1.1, 1.02)
+        ax.yaxis.set_label_coords(-0.9, 1.02)
+        if not take_abs and neg:
+            ax.yaxis.set_label_coords(-0.9, 1.02)
         # ax.set_ylabel() # position=(x, y)
         # ax.tick_params(axis='y', rotation=90)
 
         print("write ######################")
-        print("Fig\\" +shap_reason+"-"+class_name+ "-Abs-" +str(take_abs) +"-"+ str(i) + '.svg',"\n\n\n")
+        print("Fig\\" +shap_reason+"-"+class_name+ "-Abs-" +str(take_abs) +"-"+ str(i) + '_neg_'+ str(neg)+'.svg',"\n\n\n")
         plt.subplots_adjust(left=0.01, right=0.9, top=0.9, bottom=0.1)  # right=0.9, top=0.9, bottom=0.1
         # plt.show()
-        plt.savefig( "Fig\\" +shap_reason+"-"+class_name+ "-Abs-" +str(take_abs) +"-"+ str(i) + '.svg', bbox_inches="tight",
+        if take_abs:
+            plt.savefig( "Fig\\" +shap_reason+"-"+class_name+ "-Abs-" +str(take_abs) +"-"+ str(i) + '.svg', bbox_inches="tight",
                     pad_inches=0.3, format='svg')  # facecolor='y', , transparent=True, dpi=200 , format='eps'
-        # plt.savefig(dataLocation + "Figs/" + "Abs-" + str(i), bbox_inches="tight",
+        if not take_abs:
+            plt.savefig("Fig\\" + shap_reason + "-" + class_name + "-Abs-" + str(take_abs) + "-" + str(
+                i) + '_neg_' + str(neg) + '.svg', bbox_inches="tight",
+                        pad_inches=0.3, format='svg')
+            # plt.savefig(dataLocation + "Figs/" + "Abs-" + str(i), bbox_inches="tight",
         #             pad_inches=0.3)
         plt.clf()
+
 
 
 
