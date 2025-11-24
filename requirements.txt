@@ -1,8 +1,27 @@
-# Run with: pip install -r requirements.txt
-# python.exe -m pip install --upgrade pip
-# python 3.9 venv3o9 in c:\venv3o9
-# pip install torch==2.1.0+cu118 torchvision==0.16.0+cu118 torchaudio==2.1.0+cu118 --index-url https://download.pytorch.org/whl/cu118
+# PowerShell: .\.venv\Scripts\activate
+# PowerShell: python.exe -m pip install --upgrade pip
+# PowerShell: pip install torch==2.7.1+cu118 torchvision==0.22.1+cu118 torchaudio==2.7.1+cu118 --index-url https://download.pytorch.org/whl/cu118
 
+# PowerShell: pip install -r requirements.txt
+# or PowerShell: pip install -r requirements.txt --index-url https://download.pytorch.org/whl/cu118
+
+# PowerShell: python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+# PowerShell: python -c "import sys; print(sys.executable)"
+# PowerShell: python -c "import pandas; print(pandas.__version__)"
+
+# import sys
+# print("RUNNING PYTHON:", sys.executable)
+# import pandas
+# print("PANDAS VERSION:", pandas.__version__)
+
+# nvidia-smi
+# NVIDIA GeForce RTX 5080 16GB
+
+# JDK 17: https://www.oracle.com/java/technologies/downloads/#java17-windows
+
+torch==2.7.1+cu118
+torchvision==0.22.1+cu118
+torchaudio==2.7.1+cu118
 pandas
 numpy
 matplotlib
@@ -14,3 +33,4 @@ tpot
 h2o
 autokeras
 openpyxl
+
