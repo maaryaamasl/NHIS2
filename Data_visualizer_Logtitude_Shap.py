@@ -12,7 +12,7 @@ import re
 
 # TODO: * "" * "HISPALLP_A__NH Black-African-American-1" * "HISPALLP_A__NH White-1" * "SEX_A-1" - "SEX_A-0"
 
-take_abs = False
+take_abs = True
 neg = True
 shap_reason = "pain_trajectory_2019" # "pain_trajectory_2019 # without changes # "pain_trajectory" # with changes
 shap_dir = f"C:/__venv-Shap/{shap_reason}/"
@@ -205,12 +205,13 @@ for class_idx, class_name in enumerate(class_names):
     #                                                   .replace("Hdl", "HDL")
     #                                                   )
 
-    my_dpi =200
+    my_dpi = 200
     top = 50
     if not take_abs:
-        top= 10
+        top = 10
         my_dpi = 300
-    for i in range(1): #range(0, df_filtered.shape[0], 51):
+
+    for i in range(1):  # range(0, df_filtered.shape[0], 51):
         import matplotlib as mpl
 
         mpl.rcParams['font.family'] = 'Arial'
@@ -218,56 +219,91 @@ for class_idx, class_name in enumerate(class_names):
 
         partial_df = df_filtered.iloc[i:i + top].copy()
         print("partial_df: ", partial_df.shape)
-        plt.figure(figsize=(900 / my_dpi, (2000 / my_dpi) * ((partial_df.shape[0] + 10) / (51 + 10))), dpi=my_dpi) ### size
-        # sns.set(style="ticks")
-        sns.set_style("darkgrid", {"axes.facecolor": ".9"})
-        # sns.set_context("paper")
-        ax = sns.barplot(y='label', x=class_name, data=partial_df, hue='color_label',
-                         dodge=False, hue_order=hue_order,
-                         palette=palette)  # ,palette=[palette[i] for i in partial_df.color.astype(int)])
-        # plt.xticks(fontsize=8,rotation=90)# ax.tick_params(axis='both', which='major', labelsize=10)
-        # plt.tight_layout()
-        plt.legend(title="Predictors", loc='lower right', prop={'size': 23})
-        if not take_abs:
-            plt.legend(title="Predictors", loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 13})
-            plt.tight_layout(rect=[0, 0, 0.85, 1])
-        plt.xlabel('Mean |SHAP| (average impact on model output magnitude)', fontsize=12)
-        if not take_abs:
-            plt.xlabel('Mean SHAP (average directional impact on model output)', fontsize=12)
-        plt.ylabel('Variables', fontsize=12, rotation=0)
-        # plt.show()
-        plt.xlim(df_filtered[class_name].min() - 0.0001, df_filtered[class_name].max() * 1.02)
-        if not take_abs and neg:
-            plt.xlim(df_filtered[class_name].min() - 0.0001, 0.0)
-        plt.grid()
 
-        mpl.rcParams['font.family'] = 'Arial'
-        sns.set(font="Arial")
-        legend = plt.legend(loc='lower right', prop={'size': 13})
-        if not take_abs:
-            legend = plt.legend(title="Predictors", loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 13})
+        fig, ax = plt.subplots(
+            figsize=(900 / my_dpi, (2000 / my_dpi) * ((partial_df.shape[0] + 10) / (51 + 10))),
+            dpi=my_dpi
+        )
+
+        sns.set_style("darkgrid", {"axes.facecolor": ".9"})
+
+        ax = sns.barplot(
+            y='label',
+            x=class_name,
+            data=partial_df,
+            hue='color_label',
+            dodge=False,
+            hue_order=hue_order,
+            palette=palette,
+            ax=ax
+        )
+
+        # ✅ X-axis label: bold & larger
+        if take_abs:
+            ax.set_xlabel(
+                'Mean |SHAP| (average impact on model output magnitude)',
+                fontsize=14,
+                fontweight='bold'
+            )
+        else:
+            ax.set_xlabel(
+                'Mean SHAP (average directional impact on model output)',
+                fontsize=14,
+                fontweight='bold'
+            )
+
+        # ✅ Y-axis label: bold & larger
+        ax.set_ylabel('Variables', fontsize=14, fontweight='bold', rotation=0)
+
+        # Limits
+        ax.set_xlim(df_filtered[class_name].min() - 0.0001,
+                    df_filtered[class_name].max() * 1.02)
+        if not take_abs and neg:
+            ax.set_xlim(df_filtered[class_name].min() - 0.0001, 0.0)
+
+        ax.grid(True)
+
+        # ✅ Legend: outside, upper-left side
+        legend = ax.legend(
+            title="Predictors",
+            loc='upper left',
+            bbox_to_anchor=(1.02, 1.02),  # outside to the LEFT, a bit above
+            prop={'size': 14}
+        )
         frame = legend.get_frame()
         frame.set_facecolor('white')
-        # plt.axhline(y=14.5, color='r', linestyle='-')
+
+        # Keep y-label position if you like
         ax.yaxis.set_label_coords(-0.9, 1.02)
         if not take_abs and neg:
             ax.yaxis.set_label_coords(-0.9, 1.02)
-        # ax.set_ylabel() # position=(x, y)
-        # ax.tick_params(axis='y', rotation=90)
 
         print("write ######################")
-        print("Fig\\" +shap_reason+"-"+class_name+ "-Abs-" +str(take_abs) +"-"+ str(i) + '_neg_'+ str(neg)+'.svg',"\n\n\n")
-        plt.subplots_adjust(left=0.01, right=0.9, top=0.9, bottom=0.1)  # right=0.9, top=0.9, bottom=0.1
-        # plt.show()
+        print(
+            "Fig\\" + shap_reason + "-" + class_name + "-Abs-" + str(take_abs)
+            + "-" + str(i) + '_neg_' + str(neg) + '.svg',
+            "\n\n\n"
+        )
+
+        # ✅ Add extra room on the left for the legend
+        plt.subplots_adjust(left=0.35, right=0.95, top=0.9, bottom=0.1)
+
         if take_abs:
-            plt.savefig( "Fig\\" +shap_reason+"-"+class_name+ "-Abs-" +str(take_abs) +"-"+ str(i) + '.svg', bbox_inches="tight",
-                    pad_inches=0.3, format='svg')  # facecolor='y', , transparent=True, dpi=200 , format='eps'
-        if not take_abs:
-            plt.savefig("Fig\\" + shap_reason + "-" + class_name + "-Abs-" + str(take_abs) + "-" + str(
-                i) + '_neg_' + str(neg) + '.svg', bbox_inches="tight",
-                        pad_inches=0.3, format='svg')
-            # plt.savefig(dataLocation + "Figs/" + "Abs-" + str(i), bbox_inches="tight",
-        #             pad_inches=0.3)
+            plt.savefig(
+                "Fig\\" + shap_reason + "-" + class_name + "-Abs-" + str(take_abs) + "-" + str(i) + '.svg',
+                bbox_inches="tight",
+                pad_inches=0.3,
+                format='svg'
+            )
+        else:
+            plt.savefig(
+                "Fig\\" + shap_reason + "-" + class_name + "-Abs-" + str(take_abs) + "-" + str(i)
+                + '_neg_' + str(neg) + '.svg',
+                bbox_inches="tight",
+                pad_inches=0.3,
+                format='svg'
+            )
+
         plt.clf()
 
 
